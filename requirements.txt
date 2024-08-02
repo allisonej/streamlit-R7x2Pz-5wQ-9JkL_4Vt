@@ -3,5 +3,5 @@ matplotlib
 seaborn
 streamlit
 babel
-st-gsheets-connection
-
+streamlit==1.22
+git+https://github.com/streamlit/gsheets-connection
