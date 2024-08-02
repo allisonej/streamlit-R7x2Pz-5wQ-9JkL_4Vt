@@ -2,13 +2,12 @@
 
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
+import pandas as pd
 
 # Create a connection object.
-conn = st.connection("gsheets", type=GSheetsConnection)
+conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
-df = conn.read(
-    worksheet="WARNING_TEST"
-)
+df = conn.read(worksheet="WARNING_TEST", usecols=[0,1], ttl=1)
 
 # # Print results.
 # for row in df.itertuples():
