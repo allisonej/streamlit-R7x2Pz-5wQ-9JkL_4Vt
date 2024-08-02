@@ -7,9 +7,7 @@ from streamlit_gsheets import GSheetsConnection
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 df = conn.read(
-    worksheet="WARNING_TEST",
-    ttl="10m",
-    usecols=[0, 1]
+    worksheet="WARNING_TEST"
 )
 
 # # Print results.
