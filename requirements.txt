@@ -3,3 +3,5 @@ matplotlib
 seaborn
 streamlit
 babel
+GSheetsConnection
+
