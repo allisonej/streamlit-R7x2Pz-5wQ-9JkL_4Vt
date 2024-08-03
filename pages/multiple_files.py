@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 from io import StringIO
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, ConfusionMatrixDisplay
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
@@ -48,6 +49,56 @@ def process_files(best_file, current_file, answer_key):
     total_rows = len(changed_df)
     unique_ids = changed_df['ID'].nunique()
     
+    # AUC 계산
+    if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
+        y_true = (changed_df['label'] == 'positive').astype(int)  # 'positive'를 양성 클래스로 가정
+        y_scores_best = (changed_df['target_best'] == 'positive').astype(int)
+        y_scores_current = (changed_df['target_current'] == 'positive').astype(int)
+        
+        try:
+            auc_best = roc_auc_score(y_true, y_scores_best)
+            auc_current = roc_auc_score(y_true, y_scores_current)
+        except ValueError:
+            auc_best = None
+            auc_current = None
+        
+        st.write(f"Best File의 AUC: {auc_best:.2f}" if auc_best is not None else "Best File의 AUC를 계산할 수 없습니다.")
+        st.write(f"Current File의 AUC: {auc_current:.2f}" if auc_current is not None else "Current File의 AUC를 계산할 수 없습니다.")
+    
+    # Precision, Recall, F1-Score 계산
+    if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
+        try:
+            precision_best = precision_score(y_true, y_scores_best)
+            recall_best = recall_score(y_true, y_scores_best)
+            f1_best = f1_score(y_true, y_scores_best)
+            
+            precision_current = precision_score(y_true, y_scores_current)
+            recall_current = recall_score(y_true, y_scores_current)
+            f1_current = f1_score(y_true, y_scores_current)
+        except ValueError:
+            precision_best = recall_best = f1_best = precision_current = recall_current = f1_current = None
+        
+        st.write(f"Best File의 Precision: {precision_best:.2f}" if precision_best is not None else "Best File의 Precision을 계산할 수 없습니다.")
+        st.write(f"Best File의 Recall: {recall_best:.2f}" if recall_best is not None else "Best File의 Recall을 계산할 수 없습니다.")
+        st.write(f"Best File의 F1-Score: {f1_best:.2f}" if f1_best is not None else "Best File의 F1-Score를 계산할 수 없습니다.")
+        
+        st.write(f"Current File의 Precision: {precision_current:.2f}" if precision_current is not None else "Current File의 Precision을 계산할 수 없습니다.")
+        st.write(f"Current File의 Recall: {recall_current:.2f}" if recall_current is not None else "Current File의 Recall을 계산할 수 없습니다.")
+        st.write(f"Current File의 F1-Score: {f1_current:.2f}" if f1_current is not None else "Current File의 F1-Score를 계산할 수 없습니다.")
+    
+    # Confusion Matrix 계산
+    if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
+        cm_best = confusion_matrix(y_true, y_scores_best, labels=[0, 1])
+        cm_current = confusion_matrix(y_true, y_scores_current, labels=[0, 1])
+        
+        st.write("Confusion Matrix for Best File:")
+        cm_display_best = ConfusionMatrixDisplay(confusion_matrix=cm_best, display_labels=['Negative', 'Positive'])
+        st.pyplot(cm_display_best.plot(include_values=True, cmap='Blues').figure)
+        
+        st.write("Confusion Matrix for Current File:")
+        cm_display_current = ConfusionMatrixDisplay(confusion_matrix=cm_current, display_labels=['Negative', 'Positive'])
+        st.pyplot(cm_display_current.plot(include_values=True, cmap='Blues').figure)
+    
     # 분석 결과 출력
     if not changed_df.empty:
         st.write("정답이 틀린 항목에 대한 분석표입니다.")
@@ -90,12 +141,12 @@ def process_files(best_file, current_file, answer_key):
             wrong_label_best = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
             st.write("Best File에서의 빈도수:")
             st.write(wrong_label_best)
-        with col1:
+        with col2:
             # target_current에서 label과 다른 값들의 수
             wrong_label_current = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
             st.write("Current File에서의 빈도수:")
             st.write(wrong_label_current)
-        with col1:
+        with col3:
             # 전체적으로 틀린 label 수
             all_wrong_labels = changed_df['label'].value_counts().sort_values(ascending=False)
             st.write("전체적으로 틀린 label 수:")
