@@ -23,25 +23,39 @@ def process_files(uploaded_file, answer_key):
     
     # 분석 결과 출력
     if not changed_df.empty:
-        st.write("ID가 변경된 target 값을 가진 항목들:")
-        st.dataframe(changed_df[['ID', 'target', 'label']])
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.write("ID가 변경된 target 값을 가진 항목들:")
+            st.dataframe(changed_df[['ID', 'target', 'label']])
         
-        st.write("target 열의 값 빈도수:")
-        st.write(changed_df['target'].value_counts())
-
-        st.write("label 열의 값 빈도수:")
-        st.write(changed_df['label'].value_counts())
-
-        st.write("[target, label] 조합의 빈도수:")
-        pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='Count')
-        st.write(pair_counts)
+        with col2:
+            st.write("target 열의 값 빈도수:")
+            st.write(changed_df['target'].value_counts())
+        
+        with col3:
+            st.write("label 열의 값 빈도수:")
+            st.write(changed_df['label'].value_counts())
+        
+        with col4:
+            st.write("[target, label] 조합의 빈도수:")
+            pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='Count')
+            st.write(pair_counts)
 
         # 결과를 CSV로 저장
         changed_df.to_csv('compare_asr.csv', index=False)
-        st.download_button(label="Download Result CSV", data=open('compare_asr.csv', 'rb'), file_name='compare_asr.csv')
+        st.download_button(
+            label="Download Result CSV",
+            data=open('compare_asr.csv', 'rb').read(),
+            file_name='compare_asr.csv'
+        )
 
-        pair_counts.to_csv('pair.csv', index=False)
-        st.download_button(label="Download Pair CSV", data=open('pair.csv', 'rb'), file_name='pair.csv')
+        pair_counts.to_csv('target_label_pair.csv', index=False)
+        st.download_button(
+            label="Download Pair CSV",
+            data=open('pair.csv', 'rb').read(),
+            file_name='pair.csv'
+        )
     else:
         st.write("변경된 target 값이 없습니다.")
 
