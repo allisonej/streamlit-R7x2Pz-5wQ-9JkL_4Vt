@@ -42,7 +42,7 @@ def process_files(uploaded_file, answer_key):
             st.write(changed_df['target'].value_counts())
         
         with col3:
-            st.write("못맞춘 정답 빈도수:")
+            st.write("못 맞춘 정답 빈도수:")
             st.write(changed_df['label'].value_counts())
         
         with col4:
