@@ -74,6 +74,16 @@ def display_metrics_results(metrics_best, metrics_current):
     with col1:
         st.write("**Macro 평균**")
         st.markdown(f"""
+        **Macro 평균**은 각 클래스의 지표를 개별적으로 계산한 후, 그 평균을 구하는 방법입니다.
+        이 방법은 클래스 간 불균형을 무시하고 각 클래스의 중요성을 동등하게 고려합니다. 즉, 각 클래스가 동등한 가중치를 가지며 평가됩니다.
+        
+        **장점**:
+        - 클래스 불균형이 있는 경우에도 각 클래스를 동등하게 평가합니다.
+        - 각 클래스의 성능을 개별적으로 평가할 수 있습니다.
+        
+        **단점**:
+        - 데이터 샘플 수가 적은 클래스의 성능이 과도하게 부각될 수 있습니다.
+        
         **Best File:**
         - Precision: {metrics_best['precision_macro']:.3f}  
         - Recall: {metrics_best['recall_macro']:.3f}  
@@ -98,6 +108,16 @@ def display_metrics_results(metrics_best, metrics_current):
     with col2:
         st.write("**Micro 평균**")
         st.markdown(f"""
+        **Micro 평균**은 전체 데이터의 지표를 계산하여, 각 클래스의 지표를 집계하는 방법입니다.
+        이 방법은 데이터 샘플의 총합에 기반하여 지표를 계산하므로, 클래스 간의 불균형에 영향을 받지 않습니다.
+        
+        **장점**:
+        - 모든 클래스의 데이터 샘플을 고려하여 평균을 계산하므로, 클래스 불균형 문제에 영향을 받지 않습니다.
+        - 전체 데이터의 성능을 종합적으로 평가할 수 있습니다.
+        
+        **단점**:
+        - 특정 클래스의 성능이 전체 성능에 덜 반영될 수 있습니다.
+        
         **Best File:**
         - Precision: {metrics_best['precision_micro']:.3f}  
         - Recall: {metrics_best['recall_micro']:.3f}  
@@ -122,6 +142,16 @@ def display_metrics_results(metrics_best, metrics_current):
     with col3:
         st.write("**Weighted 평균**")
         st.markdown(f"""
+        **Weighted 평균**은 각 클래스의 지표를 계산한 후, 클래스의 샘플 수에 따라 가중 평균을 구하는 방법입니다.
+        이 방법은 클래스의 샘플 수를 고려하여 지표를 조정합니다. 클래스 불균형을 반영하여, 더 많은 샘플을 가진 클래스에 더 많은 가중치를 부여합니다.
+        
+        **장점**:
+        - 클래스 샘플 수에 비례하여 지표를 조정하므로, 클래스 불균형 문제를 완화할 수 있습니다.
+        - 데이터의 실제 분포를 반영한 평가가 가능합니다.
+        
+        **단점**:
+        - 샘플 수가 적은 클래스의 성능이 반영되지 않을 수 있습니다.
+        
         **Best File:**
         - Precision: {metrics_best['precision_weighted']:.3f}  
         - Recall: {metrics_best['recall_weighted']:.3f}  
@@ -142,6 +172,7 @@ def display_metrics_results(metrics_best, metrics_current):
         - Recall: Recall 계산 불가  
         - F1-Score: F1-Score 계산 불가  
         """)
+
 
 
 def process_evaluation(changed_df):
