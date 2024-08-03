@@ -61,6 +61,11 @@ def process_files(uploaded_file, answer_key):
         st.write("변경된 target 값이 없습니다.")
 
 # Streamlit 앱의 레이아웃 설정
+st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
+
+# 사이드바에 메시지 추가
+st.sidebar.write("우측 메뉴에서 wide mode를 적용해주세요.")
+
 st.title("CSV File Grader and Analyzer")
 
 st.write("업로드할 CSV 파일을 선택하세요.")
