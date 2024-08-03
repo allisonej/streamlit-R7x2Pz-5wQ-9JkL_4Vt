@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 from io import StringIO
-from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
@@ -85,19 +85,6 @@ def process_files(best_file, current_file, answer_key):
         st.write(f"Current File의 Precision: {precision_current:.2f}" if precision_current is not None else "Current File의 Precision을 계산할 수 없습니다.")
         st.write(f"Current File의 Recall: {recall_current:.2f}" if recall_current is not None else "Current File의 Recall을 계산할 수 없습니다.")
         st.write(f"Current File의 F1-Score: {f1_current:.2f}" if f1_current is not None else "Current File의 F1-Score를 계산할 수 없습니다.")
-    
-    # Confusion Matrix 계산
-    if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
-        cm_best = confusion_matrix(y_true, y_scores_best, labels=[0, 1])
-        cm_current = confusion_matrix(y_true, y_scores_current, labels=[0, 1])
-        
-        st.write("Confusion Matrix for Best File:")
-        cm_display_best = ConfusionMatrixDisplay(confusion_matrix=cm_best, display_labels=['Negative', 'Positive'])
-        st.pyplot(cm_display_best.plot(include_values=True, cmap='Blues').figure)
-        
-        st.write("Confusion Matrix for Current File:")
-        cm_display_current = ConfusionMatrixDisplay(confusion_matrix=cm_current, display_labels=['Negative', 'Positive'])
-        st.pyplot(cm_display_current.plot(include_values=True, cmap='Blues').figure)
     
     # 분석 결과 출력
     if not changed_df.empty:
