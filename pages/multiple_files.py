@@ -65,15 +65,41 @@ def calculate_metrics(y_true, y_scores):
     return metrics
 
 def display_metrics_results(metrics_best, metrics_current):
-    """Display precision, recall, and F1-score results."""
-    for avg in ['macro', 'micro', 'weighted']:
-        st.write(f"Best File의 {avg.capitalize()} Precision: {metrics_best[f'precision_{avg}']:.2f}" if metrics_best[f'precision_{avg}'] is not None else f"Best File의 {avg.capitalize()} Precision을 계산할 수 없습니다.")
-        st.write(f"Best File의 {avg.capitalize()} Recall: {metrics_best[f'recall_{avg}']:.2f}" if metrics_best[f'recall_{avg}'] is not None else f"Best File의 {avg.capitalize()} Recall을 계산할 수 없습니다.")
-        st.write(f"Best File의 {avg.capitalize()} F1-Score: {metrics_best[f'f1_{avg}']:.2f}" if metrics_best[f'f1_{avg}'] is not None else f"Best File의 {avg.capitalize()} F1-Score를 계산할 수 없습니다.")
+    """Display precision, recall, and F1-score results in columns."""
+    st.write("평가지표 결과:")
+    
+    # 3개의 컬럼으로 결과 표시
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.write("Macro 평균")
+        st.write(f"Precision: {metrics_best['precision_macro']:.3f}" if metrics_best['precision_macro'] is not None else "Precision 계산 불가")
+        st.write(f"Recall: {metrics_best['recall_macro']:.3f}" if metrics_best['recall_macro'] is not None else "Recall 계산 불가")
+        st.write(f"F1-Score: {metrics_best['f1_macro']:.3f}" if metrics_best['f1_macro'] is not None else "F1-Score 계산 불가")
         
-        st.write(f"Current File의 {avg.capitalize()} Precision: {metrics_current[f'precision_{avg}']:.2f}" if metrics_current[f'precision_{avg}'] is not None else f"Current File의 {avg.capitalize()} Precision을 계산할 수 없습니다.")
-        st.write(f"Current File의 {avg.capitalize()} Recall: {metrics_current[f'recall_{avg}']:.2f}" if metrics_current[f'recall_{avg}'] is not None else f"Current File의 {avg.capitalize()} Recall을 계산할 수 없습니다.")
-        st.write(f"Current File의 {avg.capitalize()} F1-Score: {metrics_current[f'f1_{avg}']:.2f}" if metrics_current[f'f1_{avg}'] is not None else f"Current File의 {avg.capitalize()} F1-Score를 계산할 수 없습니다.")
+        st.write(f"Precision: {metrics_current['precision_macro']:.3f}" if metrics_current['precision_macro'] is not None else "Precision 계산 불가")
+        st.write(f"Recall: {metrics_current['recall_macro']:.3f}" if metrics_current['recall_macro'] is not None else "Recall 계산 불가")
+        st.write(f"F1-Score: {metrics_current['f1_macro']:.3f}" if metrics_current['f1_macro'] is not None else "F1-Score 계산 불가")
+
+    with col2:
+        st.write("Micro 평균")
+        st.write(f"Precision: {metrics_best['precision_micro']:.3f}" if metrics_best['precision_micro'] is not None else "Precision 계산 불가")
+        st.write(f"Recall: {metrics_best['recall_micro']:.3f}" if metrics_best['recall_micro'] is not None else "Recall 계산 불가")
+        st.write(f"F1-Score: {metrics_best['f1_micro']:.3f}" if metrics_best['f1_micro'] is not None else "F1-Score 계산 불가")
+        
+        st.write(f"Precision: {metrics_current['precision_micro']:.3f}" if metrics_current['precision_micro'] is not None else "Precision 계산 불가")
+        st.write(f"Recall: {metrics_current['recall_micro']:.3f}" if metrics_current['recall_micro'] is not None else "Recall 계산 불가")
+        st.write(f"F1-Score: {metrics_current['f1_micro']:.3f}" if metrics_current['f1_micro'] is not None else "F1-Score 계산 불가")
+
+    with col3:
+        st.write("Weighted 평균")
+        st.write(f"Precision: {metrics_best['precision_weighted']:.3f}" if metrics_best['precision_weighted'] is not None else "Precision 계산 불가")
+        st.write(f"Recall: {metrics_best['recall_weighted']:.3f}" if metrics_best['recall_weighted'] is not None else "Recall 계산 불가")
+        st.write(f"F1-Score: {metrics_best['f1_weighted']:.3f}" if metrics_best['f1_weighted'] is not None else "F1-Score 계산 불가")
+        
+        st.write(f"Precision: {metrics_current['precision_weighted']:.3f}" if metrics_current['precision_weighted'] is not None else "Precision 계산 불가")
+        st.write(f"Recall: {metrics_current['recall_weighted']:.3f}" if metrics_current['recall_weighted'] is not None else "Recall 계산 불가")
+        st.write(f"F1-Score: {metrics_current['f1_weighted']:.3f}" if metrics_current['f1_weighted'] is not None else "F1-Score 계산 불가")
 
 def process_evaluation(changed_df):
     """Process evaluation metrics for given dataframe."""
