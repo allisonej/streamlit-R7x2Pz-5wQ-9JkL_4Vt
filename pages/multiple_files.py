@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 from io import StringIO
-from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import precision_score, recall_score, f1_score
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
@@ -46,18 +46,6 @@ def calculate_statistics(changed_df):
     unique_ids = changed_df['ID'].nunique()
     return total_rows, unique_ids
 
-def calculate_auc(y_true, y_scores_best, y_scores_current):
-    """Calculate AUC scores for the best and current predictions."""
-    try:
-        auc_best = roc_auc_score(y_true, y_scores_best, multi_class='ovr')
-        auc_current = roc_auc_score(y_true, y_scores_current, multi_class='ovr')
-    except ValueError as e:
-        auc_best = None
-        auc_current = None
-        st.write(f"AUC 계산 중 오류 발생: {e}")
-    
-    return auc_best, auc_current
-
 def calculate_metrics(y_true, y_scores):
     """Calculate precision, recall, and F1-score for given predictions."""
     metrics = {}
@@ -75,11 +63,6 @@ def calculate_metrics(y_true, y_scores):
             st.write(f"평가지표 계산 중 오류 발생: {e}")
     
     return metrics
-
-def display_auc_results(auc_best, auc_current):
-    """Display AUC results."""
-    st.write(f"Best File의 AUC: {auc_best:.2f}" if auc_best is not None else "Best File의 AUC를 계산할 수 없습니다.")
-    st.write(f"Current File의 AUC: {auc_current:.2f}" if auc_current is not None else "Current File의 AUC를 계산할 수 없습니다.")
 
 def display_metrics_results(metrics_best, metrics_current):
     """Display precision, recall, and F1-score results."""
@@ -99,10 +82,6 @@ def process_evaluation(changed_df):
         y_true = changed_df['label'].astype(int)
         y_scores_best = changed_df['target_best'].astype(int)
         y_scores_current = changed_df['target_current'].astype(int)
-        
-        # AUC 계산
-        auc_best, auc_current = calculate_auc(y_true, y_scores_best, y_scores_current)
-        display_auc_results(auc_best, auc_current)
         
         # Precision, Recall, F1-Score 계산
         metrics_best = calculate_metrics(y_true, y_scores_best)
