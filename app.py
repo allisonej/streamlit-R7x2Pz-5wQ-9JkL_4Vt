@@ -28,6 +28,13 @@ def process_files(uploaded_file, answer_key):
         with col1:
             st.write("ID가 변경된 target 값을 가진 항목들:")
             st.dataframe(changed_df[['ID', 'target', 'label']])
+            # 결과를 CSV로 저장
+            changed_df.to_csv('compare_asr.csv', index=False)
+            st.download_button(
+                label="Download Result CSV",
+                data=open('compare_asr.csv', 'rb').read(),
+                file_name='compare_asr.csv'
+            )
         
         with col2:
             st.write("target 열의 값 빈도수:")
@@ -42,21 +49,14 @@ def process_files(uploaded_file, answer_key):
             pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='Count')
             pair_counts_sorted = pair_counts.sort_values(by='Count', ascending=False)
             st.write(pair_counts_sorted)
+            # 결과를 CSV로 저장
+            pair_counts_sorted.to_csv('pair.csv', index=False)
+            st.download_button(
+                label="Download Pair CSV",
+                data=open('pair.csv', 'rb').read(),
+                file_name='pair.csv'
+            )
 
-        # 결과를 CSV로 저장
-        changed_df.to_csv('compare_asr.csv', index=False)
-        st.download_button(
-            label="Download Result CSV",
-            data=open('compare_asr.csv', 'rb').read(),
-            file_name='compare_asr.csv'
-        )
-
-        pair_counts_sorted.to_csv('pair.csv', index=False)
-        st.download_button(
-            label="Download Pair CSV",
-            data=open('pair.csv', 'rb').read(),
-            file_name='pair.csv'
-        )
     else:
         st.write("변경된 target 값이 없습니다.")
 
