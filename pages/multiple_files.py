@@ -3,7 +3,6 @@ import pandas as pd
 import requests
 from io import StringIO, BytesIO
 import matplotlib.pyplot as plt
-from matplotlib import font_manager
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
@@ -14,13 +13,6 @@ def load_answer_key(url):
     response = requests.get(url)
     answer_key = pd.read_csv(StringIO(response.text))
     return answer_key
-
-def set_matplotlib_font():
-    # 한글 폰트 설정
-    font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'  # 시스템에 설치된 한글 폰트 경로 (예: Nanum Gothic)
-    font_manager.fontManager.addfont(font_path)
-    plt.rcParams['font.family'] = font_manager.FontProperties(fname=font_path).get_name()
-    plt.rcParams['axes.unicode_minus'] = False  # 마이너스 기호 깨짐 방지
 
 def process_files(best_file, current_file, answer_key):
     # 파일 읽기
@@ -63,7 +55,6 @@ def process_files(best_file, current_file, answer_key):
         
         # 그래프 그리기
         st.write("각 label별 target 값의 선 그래프:")
-        set_matplotlib_font()
         
         plt.figure(figsize=(10, 6))
         
@@ -73,9 +64,9 @@ def process_files(best_file, current_file, answer_key):
             target_counts_current = subset['target_current'].value_counts().reindex(['target_current'], fill_value=0)
             plt.plot(['Best File', 'Current File'], [target_counts_best.sum(), target_counts_current.sum()], marker='o', label=f'{label}')
 
-        plt.xlabel('CSV 파일명')
-        plt.ylabel('Target 값의 빈도수')
-        plt.title('각 label별 target 값의 빈도수')
+        plt.xlabel('CSV File')
+        plt.ylabel('Target Value Count')
+        plt.title('Target Value Count by Label')
         plt.legend()
         st.pyplot(plt)
     else:
