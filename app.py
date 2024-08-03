@@ -23,10 +23,11 @@ def process_files(uploaded_file, answer_key):
     
     # 분석 결과 출력
     if not changed_df.empty:
+        st.write("정답이 틀린 항목에대해 분석표입니다.")
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.write("ID가 변경된 target 값을 가진 항목들:")
+            st.write("ID, 에측값, 정답:")
             st.dataframe(changed_df[['ID', 'target', 'label']])
             # 결과를 CSV로 저장
             changed_df.to_csv('compare_asr.csv', index=False)
@@ -37,15 +38,15 @@ def process_files(uploaded_file, answer_key):
             )
         
         with col2:
-            st.write("target 열의 값 빈도수:")
+            st.write("틀린 예측값 빈도수:")
             st.write(changed_df['target'].value_counts())
         
         with col3:
-            st.write("label 열의 값 빈도수:")
+            st.write("못맞춘 정답 빈도수:")
             st.write(changed_df['label'].value_counts())
         
         with col4:
-            st.write("[target, label] 조합의 빈도수:")
+            st.write("[예측값, 정답] 조합의 빈도수:")
             pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='Count')
             pair_counts_sorted = pair_counts.sort_values(by='Count', ascending=False)
             st.write(pair_counts_sorted)
