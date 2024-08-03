@@ -45,6 +45,7 @@ def calculate_statistics(changed_df):
     total_rows = len(changed_df)
     unique_ids = changed_df['ID'].nunique()
     return total_rows, unique_ids
+
 def calculate_auc(y_true, y_scores_best, y_scores_current):
     """Calculate AUC scores for the best and current predictions."""
     try:
@@ -107,6 +108,7 @@ def process_evaluation(changed_df):
         metrics_best = calculate_metrics(y_true, y_scores_best)
         metrics_current = calculate_metrics(y_true, y_scores_current)
         display_metrics_results(metrics_best, metrics_current)
+
 def display_results(changed_df):
     """Display various results for the changed dataframe."""
     if not changed_df.empty:
@@ -174,7 +176,7 @@ def process_files(best_file, current_file, answer_key):
     best_df, current_df = read_files(best_file, current_file)
     merged_df = merge_dataframes(best_df, current_df, answer_key)
     changed_df = calculate_mismatch(merged_df)
-    display_results(changed_df)
+    return changed_df
 
 # Streamlit 앱의 레이아웃 설정
 st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
@@ -195,8 +197,18 @@ with col1:
 with col2:
     current_file = st.file_uploader("Upload Current File (CSV)", type="csv")
 
-# 처리 버튼 클릭 시 파일 처리
+# 탭 생성
+tabs = st.tabs(["평가지표", "통계표"])
+
 if best_file and current_file:
     if st.button("Process Files"):
         answer_key = load_answer_key(sheet_url)
-        process_files(best_file, current_file, answer_key)
+        changed_df = process_files(best_file, current_file, answer_key)
+
+        with tabs[0]:
+            st.header("평가지표")
+            process_evaluation(changed_df)
+        
+        with tabs[1]:
+            st.header("통계표")
+            display_results(changed_df)
