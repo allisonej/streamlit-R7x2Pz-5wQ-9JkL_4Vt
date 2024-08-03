@@ -11,36 +11,15 @@ def load_answer_key(url):
     # 구글 시트에서 정답 데이터를 CSV로 읽어오기
     response = requests.get(url)
     answer_key = pd.read_csv(StringIO(response.text))
-    # ID 열의 데이터 타입을 문자열로 변환
-    answer_key['ID'] = answer_key['ID'].astype(str)
     return answer_key
 
-def process_files(uploaded_files, answer_key):
-    # 업로드된 파일들을 읽어와서 하나의 DataFrame으로 결합
-    all_data = []
-    for i, file in enumerate(uploaded_files):
-        user_df = pd.read_csv(file)
-        # 파일에 대한 target 컬럼 이름 생성
-        user_df.rename(columns={'target': f'target_{i+1}'}, inplace=True)
-        # ID 열의 데이터 타입을 문자열로 변환
-        user_df['ID'] = user_df['ID'].astype(str)
-        all_data.append(user_df)
-    
-    # 모든 파일 데이터를 하나로 결합 (ID 기준)
-    user_df_combined = pd.concat(all_data, axis=1).drop_duplicates(subset='ID')
-    # ID 열의 데이터 타입을 문자열로 변환
-    user_df_combined['ID'] = user_df_combined['ID'].astype(str)
-    
-    # 정답지와 병합
-    merged_df = pd.merge(user_df_combined, answer_key, on='ID', how='left')
-    
-    # 모든 target 컬럼과 label을 비교
-    merged_df['target_mismatch'] = False
-    for i in range(len(uploaded_files)):
-        merged_df['target_mismatch'] |= (merged_df[f'target_{i+1}'] != merged_df['label'])
-    
-    # target과 label이 다른 항목만 필터링
-    changed_df = merged_df[merged_df['target_mismatch']]
+def process_files(uploaded_file, answer_key):
+    # 업로드된 CSV 파일 읽기
+    user_df = pd.read_csv(uploaded_file)
+
+    # 데이터 처리
+    merged_df = pd.merge(user_df, answer_key, on='ID')
+    changed_df = merged_df[merged_df['target'] != merged_df['label']]
     
     # 분석 결과 출력
     if not changed_df.empty:
@@ -48,8 +27,8 @@ def process_files(uploaded_files, answer_key):
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.write("ID와 각 파일의 예측값, 정답:")
-            st.dataframe(changed_df[['ID'] + [f'target_{i+1}' for i in range(len(uploaded_files))] + ['label']])
+            st.write("ID, 예측값, 정답:")
+            st.dataframe(changed_df[['ID', 'target', 'label']])
             # 결과를 CSV로 저장
             csv_buffer = BytesIO()
             changed_df.to_csv(csv_buffer, index=False)
@@ -61,8 +40,7 @@ def process_files(uploaded_files, answer_key):
         
         with col2:
             st.write("틀린 예측값 빈도수:")
-            target_counts = pd.concat([changed_df[f'target_{i+1}'] for i in range(len(uploaded_files))]).value_counts()
-            st.write(target_counts)
+            st.write(changed_df['target'].value_counts())
         
         with col3:
             st.write("못 맞춘 정답 빈도수:")
@@ -70,11 +48,7 @@ def process_files(uploaded_files, answer_key):
         
         with col4:
             st.write("[예측값, 정답] 조합의 빈도수:")
-            pairs = pd.concat([
-                changed_df[[f'target_{i+1}', 'label']].rename(columns={f'target_{i+1}': 'target'})
-                for i in range(len(uploaded_files))
-            ])
-            pair_counts = pairs.groupby(['target', 'label']).size().reset_index(name='Count')
+            pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='Count')
             pair_counts_sorted = pair_counts.sort_values(by='Count', ascending=False)
             st.write(pair_counts_sorted)
             # 결과를 CSV로 저장
@@ -96,21 +70,20 @@ st.sidebar.write("우측 메뉴에서 wide mode를 적용해주세요.")
 
 st.title("CSV File Grader and Analyzer")
 
-st.write("업로드할 CSV 파일들을 선택하세요.")
+st.write("업로드할 CSV 파일을 선택하세요.")
 
 # 세션 상태에서 업로드된 파일 목록 관리
-if 'uploaded_files' not in st.session_state:
-    st.session_state.uploaded_files = []
+if 'uploaded_file' not in st.session_state:
+    st.session_state.uploaded_file = None
 
 # 파일 업로드 및 세션 상태 업데이트
-uploaded_files = st.file_uploader("Choose CSV files", type="csv", accept_multiple_files=True)
+uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
-if uploaded_files:
-    # 파일이 업로드되면 세션 상태를 업데이트하고 페이지를 리프레시
-    st.session_state.uploaded_files = uploaded_files
-    st.experimental_rerun()  # 페이지를 리프레시
+if uploaded_file is not None:
+    st.session_state.uploaded_file = uploaded_file
 
-# 업로드된 파일들을 정답지와 비교하여 처리
-if st.session_state.uploaded_files:
-    answer_key = load_answer_key(sheet_url)
-    process_files(st.session_state.uploaded_files, answer_key)
+# 처리 버튼 클릭 시 파일 처리
+if st.session_state.uploaded_file is not None:
+    if st.button("Process Files"):
+        answer_key = load_answer_key(sheet_url)
+        process_files(st.session_state.uploaded_file, answer_key)
