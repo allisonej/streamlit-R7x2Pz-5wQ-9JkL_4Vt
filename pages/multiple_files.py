@@ -24,6 +24,9 @@ def process_files(uploaded_files, answer_key):
         # 파일 이름을 저장
         file_names.append(file.name)
         # 'target' 컬럼의 이름을 변경
+        if 'target' not in user_df.columns:
+            st.error(f"파일 '{file.name}'에는 'target' 열이 없습니다.")
+            return
         user_df.rename(columns={'target': f'target_{i+1}'}, inplace=True)
         all_data.append(user_df)
     
@@ -31,8 +34,12 @@ def process_files(uploaded_files, answer_key):
     user_df_combined = pd.concat(all_data, axis=1, join='inner').drop_duplicates(subset='ID')
     
     # 정답지와 병합
-    merged_df = pd.merge(user_df_combined, answer_key, on='ID', how='left')
+    if 'ID' not in user_df_combined.columns or 'ID' not in answer_key.columns:
+        st.error("DataFrames에 'ID' 열이 없습니다.")
+        return
 
+    merged_df = pd.merge(user_df_combined, answer_key, on='ID', how='left')
+    
     # 모든 target 컬럼과 label을 비교
     target_columns = [f'target_{i+1}' for i in range(len(uploaded_files))]
     conditions = [merged_df[col] != merged_df['label'] for col in target_columns]
@@ -83,7 +90,7 @@ st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
 # 사이드바에 메시지 추가
 st.sidebar.write("우측 메뉴에서 wide mode를 적용해주세요.")
 
-st.title("CSV Files Analyzer")
+st.title("CSV File Grader and Analyzer")
 
 st.write("업로드할 CSV 파일들을 선택하세요.")
 
