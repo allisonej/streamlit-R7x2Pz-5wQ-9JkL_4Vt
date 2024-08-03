@@ -60,6 +60,13 @@ def process_files(best_file, current_file, answer_key):
         st.write("2. 틀린 예측값 빈도수:")
         target_counts_best = changed_df['target_best'].value_counts().sort_values(ascending=False)
         target_counts_current = changed_df['target_current'].value_counts().sort_values(ascending=False)
+        
+        st.write("Best File에서의 빈도수:")
+        st.write(target_counts_best)
+
+        st.write("Current File에서의 빈도수:")
+        st.write(target_counts_current)
+
         common_targets = pd.DataFrame({
             'Best File Count': target_counts_best,
             'Current File Count': target_counts_current
@@ -67,14 +74,22 @@ def process_files(best_file, current_file, answer_key):
         st.write(common_targets)
         
         # 3. 못 맞춘 정답 빈도수
-        st.write("3. 못 맞춘 정답 빈도수:")
-        label_counts_best = changed_df['label'].value_counts().sort_values(ascending=False)
-        label_counts_current = changed_df['label'].value_counts().sort_values(ascending=False)
-        common_labels = pd.DataFrame({
-            'Best File Count': label_counts_best,
-            'Current File Count': label_counts_current
-        }).fillna(0).astype(int).sort_values(by='Best File Count', ascending=False)
-        st.write(common_labels)
+        st.write("못 맞춘 정답 빈도수:")
+        
+        # target_best에서 label과 다른 값들의 수
+        wrong_label_best = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
+        st.write("Best File에서의 빈도수:")
+        st.write(wrong_label_best)
+
+        # target_current에서 label과 다른 값들의 수
+        wrong_label_current = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
+        st.write("Current File에서의 빈도수:")
+        st.write(wrong_label_current)
+
+        # 전체적으로 틀린 label 수
+        all_wrong_labels = changed_df['label'].value_counts().sort_values(ascending=False)
+        st.write("전체적으로 틀린 label 수:")
+        st.write(all_wrong_labels)
         
         # 4. target_best, target_current, label 조합의 빈도수
         st.write("4. target_best, target_current, label 조합의 빈도수:")
