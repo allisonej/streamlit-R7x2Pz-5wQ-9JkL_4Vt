@@ -2,12 +2,11 @@ import streamlit as st
 import pandas as pd
 import requests
 from io import StringIO
-import matplotlib.pyplot as plt
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
 
-@st.cache_data
+@st.cache
 def load_answer_key(url):
     response = requests.get(url)
     return pd.read_csv(StringIO(response.text))
@@ -27,6 +26,15 @@ def process_files(best_file, current_file, answer_key):
     # 정답지와 병합
     merged_df = pd.merge(combined_df, answer_key, on='ID', how='left')
     
+    # 업로드된 CSV의 ID 수와 정답지의 ID 수
+    num_best_ids = best_df['ID'].nunique()
+    num_current_ids = current_df['ID'].nunique()
+    num_answer_key_ids = answer_key['ID'].nunique()
+    
+    st.write(f"업로드된 Best File의 ID 수: {num_best_ids}")
+    st.write(f"업로드된 Current File의 ID 수: {num_current_ids}")
+    st.write(f"정답지의 ID 수: {num_answer_key_ids}")
+
     # 'target' 값이 'label'과 다른 행 필터링
     target_columns = ['target_best', 'target_current']
     mismatch_conditions = [merged_df[col] != merged_df['label'] for col in target_columns]
@@ -93,27 +101,6 @@ def process_files(best_file, current_file, answer_key):
         st.write("4. target_best, target_current, label 조합의 빈도수:")
         pair_counts = changed_df.groupby(['target_best', 'target_current', 'label']).size().reset_index(name='Count')
         st.dataframe(pair_counts.sort_values(by='Count', ascending=False))
-        
-        # 그래프 그리기
-        st.write("각 label별 target 값의 선 그래프:")
-        plt.figure(figsize=(12, 6))
-        labels = changed_df['label'].unique()
-        
-        for label in labels:
-            subset = changed_df[changed_df['label'] == label]
-            target_counts_best = subset['target_best'].notna().sum()
-            target_counts_current = subset['target_current'].notna().sum()
-            
-            plt.plot(['Best File', 'Current File', 'Label'], 
-                     [target_counts_best, target_counts_current, len(subset)], 
-                     marker='o', 
-                     label=f'Label {label}')
-        
-        plt.xlabel('File and Label')
-        plt.ylabel('Count')
-        plt.title('Target Value Count by Label')
-        plt.legend(title='Labels')
-        st.pyplot(plt)
     else:
         st.write("변경된 target 값이 없습니다.")
 
