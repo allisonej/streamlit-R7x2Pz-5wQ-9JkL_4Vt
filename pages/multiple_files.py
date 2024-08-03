@@ -12,81 +12,103 @@ def load_answer_key(url):
     response = requests.get(url)
     return pd.read_csv(StringIO(response.text))
 
-def process_files(best_file, current_file, answer_key):
-    # 파일 읽기
+def read_files(best_file, current_file):
+    """Read CSV files and rename 'target' columns."""
     best_df = pd.read_csv(best_file)
     current_df = pd.read_csv(current_file)
     
-    # 'target' 컬럼의 이름을 변경
     best_df.rename(columns={'target': 'target_best'}, inplace=True)
     current_df.rename(columns={'target': 'target_current'}, inplace=True)
     
-    # 'ID' 기준으로 병합
-    combined_df = pd.merge(best_df, current_df, on='ID', how='outer')
-    
-    # 정답지와 병합
-    merged_df = pd.merge(combined_df, answer_key, on='ID', how='left')
-    
-    # 업로드된 CSV의 ID 수와 정답지의 ID 수
-    num_best_ids = best_df['ID'].nunique()
-    num_current_ids = current_df['ID'].nunique()
-    num_answer_key_ids = answer_key['ID'].nunique()
-    
-    st.write(f"업로드된 Best File의 ID 수: {num_best_ids}")
-    st.write(f"업로드된 Current File의 ID 수: {num_current_ids}")
-    st.write(f"정답지의 ID 수: {num_answer_key_ids}")
+    return best_df, current_df
 
-    # 'target' 값이 'label'과 다른 행 필터링
+def merge_dataframes(best_df, current_df, answer_key):
+    """Merge best and current dataframes and then merge with answer key."""
+    combined_df = pd.merge(best_df, current_df, on='ID', how='outer')
+    merged_df = pd.merge(combined_df, answer_key, on='ID', how='left')
+    return merged_df
+
+def calculate_mismatch(merged_df):
+    """Identify rows where target values mismatch with the label."""
     target_columns = ['target_best', 'target_current']
     mismatch_conditions = [merged_df[col] != merged_df['label'] for col in target_columns]
     merged_df['target_mismatch'] = pd.concat(mismatch_conditions, axis=1).any(axis=1)
     changed_df = merged_df[merged_df['target_mismatch']]
-    
-    # 빈 칸인 값들의 수 계산
-    missing_values_summary = changed_df[['target_best', 'target_current', 'label']].isna().sum()
-    
-    # 전체 행의 수 및 고유한 ID 수
+    return changed_df
+
+def calculate_missing_values(changed_df):
+    """Calculate missing values in the changed dataframe."""
+    return changed_df[['target_best', 'target_current', 'label']].isna().sum()
+
+def calculate_statistics(changed_df):
+    """Calculate and return statistics for the changed dataframe."""
     total_rows = len(changed_df)
     unique_ids = changed_df['ID'].nunique()
+    return total_rows, unique_ids
+def calculate_auc(y_true, y_scores_best, y_scores_current):
+    """Calculate AUC scores for the best and current predictions."""
+    try:
+        auc_best = roc_auc_score(y_true, y_scores_best, multi_class='ovr')
+        auc_current = roc_auc_score(y_true, y_scores_current, multi_class='ovr')
+    except ValueError as e:
+        auc_best = None
+        auc_current = None
+        st.write(f"AUC 계산 중 오류 발생: {e}")
     
-    # AUC 계산
-    if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
-        y_true = (changed_df['label'] == 'positive').astype(int)  # 'positive'를 양성 클래스로 가정
-        y_scores_best = (changed_df['target_best'] == 'positive').astype(int)
-        y_scores_current = (changed_df['target_current'] == 'positive').astype(int)
-        
+    return auc_best, auc_current
+
+def calculate_metrics(y_true, y_scores):
+    """Calculate precision, recall, and F1-score for given predictions."""
+    metrics = {}
+    averages = ['macro', 'micro', 'weighted']
+    
+    for avg in averages:
         try:
-            auc_best = roc_auc_score(y_true, y_scores_best)
-            auc_current = roc_auc_score(y_true, y_scores_current)
-        except ValueError:
-            auc_best = None
-            auc_current = None
-        
-        st.write(f"Best File의 AUC: {auc_best:.2f}" if auc_best is not None else "Best File의 AUC를 계산할 수 없습니다.")
-        st.write(f"Current File의 AUC: {auc_current:.2f}" if auc_current is not None else "Current File의 AUC를 계산할 수 없습니다.")
+            metrics[f'precision_{avg}'] = precision_score(y_true, y_scores, average=avg)
+            metrics[f'recall_{avg}'] = recall_score(y_true, y_scores, average=avg)
+            metrics[f'f1_{avg}'] = f1_score(y_true, y_scores, average=avg)
+        except ValueError as e:
+            metrics[f'precision_{avg}'] = None
+            metrics[f'recall_{avg}'] = None
+            metrics[f'f1_{avg}'] = None
+            st.write(f"평가지표 계산 중 오류 발생: {e}")
     
-    # Precision, Recall, F1-Score 계산
+    return metrics
+
+def display_auc_results(auc_best, auc_current):
+    """Display AUC results."""
+    st.write(f"Best File의 AUC: {auc_best:.2f}" if auc_best is not None else "Best File의 AUC를 계산할 수 없습니다.")
+    st.write(f"Current File의 AUC: {auc_current:.2f}" if auc_current is not None else "Current File의 AUC를 계산할 수 없습니다.")
+
+def display_metrics_results(metrics_best, metrics_current):
+    """Display precision, recall, and F1-score results."""
+    for avg in ['macro', 'micro', 'weighted']:
+        st.write(f"Best File의 {avg.capitalize()} Precision: {metrics_best[f'precision_{avg}']:.2f}" if metrics_best[f'precision_{avg}'] is not None else f"Best File의 {avg.capitalize()} Precision을 계산할 수 없습니다.")
+        st.write(f"Best File의 {avg.capitalize()} Recall: {metrics_best[f'recall_{avg}']:.2f}" if metrics_best[f'recall_{avg}'] is not None else f"Best File의 {avg.capitalize()} Recall을 계산할 수 없습니다.")
+        st.write(f"Best File의 {avg.capitalize()} F1-Score: {metrics_best[f'f1_{avg}']:.2f}" if metrics_best[f'f1_{avg}'] is not None else f"Best File의 {avg.capitalize()} F1-Score를 계산할 수 없습니다.")
+        
+        st.write(f"Current File의 {avg.capitalize()} Precision: {metrics_current[f'precision_{avg}']:.2f}" if metrics_current[f'precision_{avg}'] is not None else f"Current File의 {avg.capitalize()} Precision을 계산할 수 없습니다.")
+        st.write(f"Current File의 {avg.capitalize()} Recall: {metrics_current[f'recall_{avg}']:.2f}" if metrics_current[f'recall_{avg}'] is not None else f"Current File의 {avg.capitalize()} Recall을 계산할 수 없습니다.")
+        st.write(f"Current File의 {avg.capitalize()} F1-Score: {metrics_current[f'f1_{avg}']:.2f}" if metrics_current[f'f1_{avg}'] is not None else f"Current File의 {avg.capitalize()} F1-Score를 계산할 수 없습니다.")
+
+def process_evaluation(changed_df):
+    """Process evaluation metrics for given dataframe."""
     if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
-        try:
-            precision_best = precision_score(y_true, y_scores_best)
-            recall_best = recall_score(y_true, y_scores_best)
-            f1_best = f1_score(y_true, y_scores_best)
-            
-            precision_current = precision_score(y_true, y_scores_current)
-            recall_current = recall_score(y_true, y_scores_current)
-            f1_current = f1_score(y_true, y_scores_current)
-        except ValueError:
-            precision_best = recall_best = f1_best = precision_current = recall_current = f1_current = None
+        # 실제 클래스와 예측 클래스
+        y_true = changed_df['label'].astype(int)
+        y_scores_best = changed_df['target_best'].astype(int)
+        y_scores_current = changed_df['target_current'].astype(int)
         
-        st.write(f"Best File의 Precision: {precision_best:.2f}" if precision_best is not None else "Best File의 Precision을 계산할 수 없습니다.")
-        st.write(f"Best File의 Recall: {recall_best:.2f}" if recall_best is not None else "Best File의 Recall을 계산할 수 없습니다.")
-        st.write(f"Best File의 F1-Score: {f1_best:.2f}" if f1_best is not None else "Best File의 F1-Score를 계산할 수 없습니다.")
+        # AUC 계산
+        auc_best, auc_current = calculate_auc(y_true, y_scores_best, y_scores_current)
+        display_auc_results(auc_best, auc_current)
         
-        st.write(f"Current File의 Precision: {precision_current:.2f}" if precision_current is not None else "Current File의 Precision을 계산할 수 없습니다.")
-        st.write(f"Current File의 Recall: {recall_current:.2f}" if recall_current is not None else "Current File의 Recall을 계산할 수 없습니다.")
-        st.write(f"Current File의 F1-Score: {f1_current:.2f}" if f1_current is not None else "Current File의 F1-Score를 계산할 수 없습니다.")
-    
-    # 분석 결과 출력
+        # Precision, Recall, F1-Score 계산
+        metrics_best = calculate_metrics(y_true, y_scores_best)
+        metrics_current = calculate_metrics(y_true, y_scores_current)
+        display_metrics_results(metrics_best, metrics_current)
+def display_results(changed_df):
+    """Display various results for the changed dataframe."""
     if not changed_df.empty:
         st.write("정답이 틀린 항목에 대한 분석표입니다.")
 
@@ -97,11 +119,13 @@ def process_files(best_file, current_file, answer_key):
             st.dataframe(changed_df[['ID', 'target_best', 'target_current', 'label']])
         with col2:
             # 빈 칸인 값들의 수 출력
+            missing_values_summary = calculate_missing_values(changed_df)
+            total_rows, unique_ids = calculate_statistics(changed_df)
             st.write("빈 칸인 값들의 수:")
             st.write(missing_values_summary)
             st.write("전체 행의 수:", total_rows)
             st.write("고유한 ID의 수:", unique_ids)
-        
+
         # 2. 틀린 예측값 빈도수
         st.write("2. 틀린 예측값 빈도수:")
         col1, col2, col3 = st.columns(3)
@@ -119,7 +143,7 @@ def process_files(best_file, current_file, answer_key):
                 'Current File Count': target_counts_current
             }).astype(int).sort_values(by='Best File Count', ascending=False)
             st.write(common_targets)
-        
+
         # 3. 못 맞춘 정답 빈도수
         st.write("3. 못 맞춘 정답 빈도수:")
         col1, col2, col3 = st.columns(3)
@@ -138,13 +162,19 @@ def process_files(best_file, current_file, answer_key):
             all_wrong_labels = changed_df['label'].value_counts().sort_values(ascending=False)
             st.write("전체적으로 틀린 label 수:")
             st.write(all_wrong_labels)
-        
+
         # 4. target_best, target_current, label 조합의 빈도수
         st.write("4. target_best, target_current, label 조합의 빈도수:")
         pair_counts = changed_df.groupby(['target_best', 'target_current', 'label']).size().reset_index(name='Count')
         st.dataframe(pair_counts.sort_values(by='Count', ascending=False))
     else:
         st.write("변경된 target 값이 없습니다.")
+
+def process_files(best_file, current_file, answer_key):
+    best_df, current_df = read_files(best_file, current_file)
+    merged_df = merge_dataframes(best_df, current_df, answer_key)
+    changed_df = calculate_mismatch(merged_df)
+    display_results(changed_df)
 
 # Streamlit 앱의 레이아웃 설정
 st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
