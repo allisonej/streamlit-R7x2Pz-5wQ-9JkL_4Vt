@@ -9,10 +9,8 @@ sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDb
 
 @st.cache_data
 def load_answer_key(url):
-    # 구글 시트에서 정답 데이터를 CSV로 읽어오기
     response = requests.get(url)
-    answer_key = pd.read_csv(StringIO(response.text))
-    return answer_key
+    return pd.read_csv(StringIO(response.text))
 
 def process_files(best_file, current_file, answer_key):
     # 파일 읽기
@@ -31,8 +29,8 @@ def process_files(best_file, current_file, answer_key):
     
     # 'target' 값이 'label'과 다른 행 필터링
     target_columns = ['target_best', 'target_current']
-    conditions = [merged_df[col] != merged_df['label'] for col in target_columns]
-    merged_df['target_mismatch'] = pd.concat(conditions, axis=1).any(axis=1)
+    mismatch_conditions = [merged_df[col] != merged_df['label'] for col in target_columns]
+    merged_df['target_mismatch'] = pd.concat(mismatch_conditions, axis=1).any(axis=1)
     changed_df = merged_df[merged_df['target_mismatch']]
     
     # 빈 칸인 값들의 수 계산
@@ -74,7 +72,7 @@ def process_files(best_file, current_file, answer_key):
         st.write(common_targets)
         
         # 3. 못 맞춘 정답 빈도수
-        st.write("못 맞춘 정답 빈도수:")
+        st.write("3. 못 맞춘 정답 빈도수:")
         
         # target_best에서 label과 다른 값들의 수
         wrong_label_best = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
@@ -94,32 +92,30 @@ def process_files(best_file, current_file, answer_key):
         # 4. target_best, target_current, label 조합의 빈도수
         st.write("4. target_best, target_current, label 조합의 빈도수:")
         pair_counts = changed_df.groupby(['target_best', 'target_current', 'label']).size().reset_index(name='Count')
-        pair_counts_sorted = pair_counts.sort_values(by='Count', ascending=False)
-        st.dataframe(pair_counts_sorted)
+        st.dataframe(pair_counts.sort_values(by='Count', ascending=False))
         
-    #     # 그래프 그리기
-    #     st.write("각 label별 target 값의 선 그래프:")
+        # 그래프 그리기
+        st.write("각 label별 target 값의 선 그래프:")
+        plt.figure(figsize=(12, 6))
+        labels = changed_df['label'].unique()
         
-    #     plt.figure(figsize=(12, 6))
-    #     labels = changed_df['label'].unique()
-        
-    #     for label in labels:
-    #         subset = changed_df[changed_df['label'] == label]
-    #         target_counts_best = subset['target_best'].notna().sum()
-    #         target_counts_current = subset['target_current'].notna().sum()
+        for label in labels:
+            subset = changed_df[changed_df['label'] == label]
+            target_counts_best = subset['target_best'].notna().sum()
+            target_counts_current = subset['target_current'].notna().sum()
             
-    #         plt.plot(['Best File', 'Current File', 'Label'], 
-    #                  [target_counts_best, target_counts_current, len(subset)], 
-    #                  marker='o', 
-    #                  label=f'Label {label}')
+            plt.plot(['Best File', 'Current File', 'Label'], 
+                     [target_counts_best, target_counts_current, len(subset)], 
+                     marker='o', 
+                     label=f'Label {label}')
         
-    #     plt.xlabel('File and Label')
-    #     plt.ylabel('Count')
-    #     plt.title('Target Value Count by Label')
-    #     plt.legend(title='Labels')
-    #     st.pyplot(plt)
-    # else:
-    #     st.write("변경된 target 값이 없습니다.")
+        plt.xlabel('File and Label')
+        plt.ylabel('Count')
+        plt.title('Target Value Count by Label')
+        plt.legend(title='Labels')
+        st.pyplot(plt)
+    else:
+        st.write("변경된 target 값이 없습니다.")
 
 # Streamlit 앱의 레이아웃 설정
 st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
