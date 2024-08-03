@@ -1,20 +1,21 @@
 import streamlit as st
 import pandas as pd
 import requests
+from io import StringIO
 
-# Google Sheets URL
+# Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
 
 @st.cache_data
 def load_answer_key(url):
     # 구글 시트에서 정답 데이터를 CSV로 읽어오기
     response = requests.get(url)
-    answer_key = pd.read_csv(pd.compat.StringIO(response.text))
+    answer_key = pd.read_csv(StringIO(response.text))
     return answer_key
 
 def process_files(uploaded_file, answer_key):
-    # 업로드된 파일 읽기
-    user_df = pd.read_excel(uploaded_file)
+    # 업로드된 CSV 파일 읽기
+    user_df = pd.read_csv(uploaded_file)
 
     # 데이터 처리
     merged_df = pd.merge(user_df, answer_key, on='ID')
@@ -45,11 +46,11 @@ def process_files(uploaded_file, answer_key):
         st.write("변경된 target 값이 없습니다.")
 
 # Streamlit 앱의 레이아웃 설정
-st.title("Excel File Grader and Analyzer")
+st.title("CSV File Grader and Analyzer")
 
-st.write("업로드할 엑셀 파일을 선택하세요.")
+st.write("업로드할 CSV 파일을 선택하세요.")
 
-uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
+uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     answer_key = load_answer_key(sheet_url)
