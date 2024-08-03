@@ -67,39 +67,82 @@ def calculate_metrics(y_true, y_scores):
 def display_metrics_results(metrics_best, metrics_current):
     """Display precision, recall, and F1-score results in columns."""
     st.write("평가지표 결과:")
-    
+
     # 3개의 컬럼으로 결과 표시
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.write("Macro 평균")
-        st.write(f"Precision: {metrics_best['precision_macro']:.3f}" if metrics_best['precision_macro'] is not None else "Precision 계산 불가")
-        st.write(f"Recall: {metrics_best['recall_macro']:.3f}" if metrics_best['recall_macro'] is not None else "Recall 계산 불가")
-        st.write(f"F1-Score: {metrics_best['f1_macro']:.3f}" if metrics_best['f1_macro'] is not None else "F1-Score 계산 불가")
+        st.write("**Macro 평균**")
+        st.markdown(f"""
+        **Best File:**
+        - Precision: {metrics_best['precision_macro']:.3f}  
+        - Recall: {metrics_best['recall_macro']:.3f}  
+        - F1-Score: {metrics_best['f1_macro']:.3f}  
         
-        st.write(f"Precision: {metrics_current['precision_macro']:.3f}" if metrics_current['precision_macro'] is not None else "Precision 계산 불가")
-        st.write(f"Recall: {metrics_current['recall_macro']:.3f}" if metrics_current['recall_macro'] is not None else "Recall 계산 불가")
-        st.write(f"F1-Score: {metrics_current['f1_macro']:.3f}" if metrics_current['f1_macro'] is not None else "F1-Score 계산 불가")
+        **Current File:**
+        - Precision: {metrics_current['precision_macro']:.3f}  
+        - Recall: {metrics_current['recall_macro']:.3f}  
+        - F1-Score: {metrics_current['f1_macro']:.3f}  
+        """ if all(v is not None for v in metrics_best.values()) and all(v is not None for v in metrics_current.values()) else """
+        **Best File:**
+        - Precision: Precision 계산 불가  
+        - Recall: Recall 계산 불가  
+        - F1-Score: F1-Score 계산 불가  
+        
+        **Current File:**
+        - Precision: Precision 계산 불가  
+        - Recall: Recall 계산 불가  
+        - F1-Score: F1-Score 계산 불가  
+        """)
 
     with col2:
-        st.write("Micro 평균")
-        st.write(f"Precision: {metrics_best['precision_micro']:.3f}" if metrics_best['precision_micro'] is not None else "Precision 계산 불가")
-        st.write(f"Recall: {metrics_best['recall_micro']:.3f}" if metrics_best['recall_micro'] is not None else "Recall 계산 불가")
-        st.write(f"F1-Score: {metrics_best['f1_micro']:.3f}" if metrics_best['f1_micro'] is not None else "F1-Score 계산 불가")
+        st.write("**Micro 평균**")
+        st.markdown(f"""
+        **Best File:**
+        - Precision: {metrics_best['precision_micro']:.3f}  
+        - Recall: {metrics_best['recall_micro']:.3f}  
+        - F1-Score: {metrics_best['f1_micro']:.3f}  
         
-        st.write(f"Precision: {metrics_current['precision_micro']:.3f}" if metrics_current['precision_micro'] is not None else "Precision 계산 불가")
-        st.write(f"Recall: {metrics_current['recall_micro']:.3f}" if metrics_current['recall_micro'] is not None else "Recall 계산 불가")
-        st.write(f"F1-Score: {metrics_current['f1_micro']:.3f}" if metrics_current['f1_micro'] is not None else "F1-Score 계산 불가")
+        **Current File:**
+        - Precision: {metrics_current['precision_micro']:.3f}  
+        - Recall: {metrics_current['recall_micro']:.3f}  
+        - F1-Score: {metrics_current['f1_micro']:.3f}  
+        """ if all(v is not None for v in metrics_best.values()) and all(v is not None for v in metrics_current.values()) else """
+        **Best File:**
+        - Precision: Precision 계산 불가  
+        - Recall: Recall 계산 불가  
+        - F1-Score: F1-Score 계산 불가  
+        
+        **Current File:**
+        - Precision: Precision 계산 불가  
+        - Recall: Recall 계산 불가  
+        - F1-Score: F1-Score 계산 불가  
+        """)
 
     with col3:
-        st.write("Weighted 평균")
-        st.write(f"Precision: {metrics_best['precision_weighted']:.3f}" if metrics_best['precision_weighted'] is not None else "Precision 계산 불가")
-        st.write(f"Recall: {metrics_best['recall_weighted']:.3f}" if metrics_best['recall_weighted'] is not None else "Recall 계산 불가")
-        st.write(f"F1-Score: {metrics_best['f1_weighted']:.3f}" if metrics_best['f1_weighted'] is not None else "F1-Score 계산 불가")
+        st.write("**Weighted 평균**")
+        st.markdown(f"""
+        **Best File:**
+        - Precision: {metrics_best['precision_weighted']:.3f}  
+        - Recall: {metrics_best['recall_weighted']:.3f}  
+        - F1-Score: {metrics_best['f1_weighted']:.3f}  
         
-        st.write(f"Precision: {metrics_current['precision_weighted']:.3f}" if metrics_current['precision_weighted'] is not None else "Precision 계산 불가")
-        st.write(f"Recall: {metrics_current['recall_weighted']:.3f}" if metrics_current['recall_weighted'] is not None else "Recall 계산 불가")
-        st.write(f"F1-Score: {metrics_current['f1_weighted']:.3f}" if metrics_current['f1_weighted'] is not None else "F1-Score 계산 불가")
+        **Current File:**
+        - Precision: {metrics_current['precision_weighted']:.3f}  
+        - Recall: {metrics_current['recall_weighted']:.3f}  
+        - F1-Score: {metrics_current['f1_weighted']:.3f}  
+        """ if all(v is not None for v in metrics_best.values()) and all(v is not None for v in metrics_current.values()) else """
+        **Best File:**
+        - Precision: Precision 계산 불가  
+        - Recall: Recall 계산 불가  
+        - F1-Score: F1-Score 계산 불가  
+        
+        **Current File:**
+        - Precision: Precision 계산 불가  
+        - Recall: Recall 계산 불가  
+        - F1-Score: F1-Score 계산 불가  
+        """)
+
 
 def process_evaluation(changed_df):
     """Process evaluation metrics for given dataframe."""
