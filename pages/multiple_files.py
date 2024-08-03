@@ -54,48 +54,52 @@ def process_files(best_file, current_file, answer_key):
 
         # 1. 병합되고 오답을 가진 행들로 이루어진 df의 출력
         st.write("1. 병합되고 오답을 가진 행들:")
-        st.dataframe(changed_df[['ID', 'target_best', 'target_current', 'label']])
-        
-        # 빈 칸인 값들의 수 출력
-        st.write("빈 칸인 값들의 수:")
-        st.write(missing_values_summary)
-        st.write("전체 행의 수:", total_rows)
-        st.write("고유한 ID의 수:", unique_ids)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.dataframe(changed_df[['ID', 'target_best', 'target_current', 'label']])
+        with col2:
+            # 빈 칸인 값들의 수 출력
+            st.write("빈 칸인 값들의 수:")
+            st.write(missing_values_summary)
+            st.write("전체 행의 수:", total_rows)
+            st.write("고유한 ID의 수:", unique_ids)
         
         # 2. 틀린 예측값 빈도수
         st.write("2. 틀린 예측값 빈도수:")
+        col1, col2, col3 = st.columns(3)
         target_counts_best = changed_df['target_best'].value_counts().sort_values(ascending=False)
         target_counts_current = changed_df['target_current'].value_counts().sort_values(ascending=False)
-        
-        st.write("Best File에서의 빈도수:")
-        st.write(target_counts_best)
-
-        st.write("Current File에서의 빈도수:")
-        st.write(target_counts_current)
-
-        common_targets = pd.DataFrame({
-            'Best File Count': target_counts_best,
-            'Current File Count': target_counts_current
-        }).fillna(0).astype(int).sort_values(by='Best File Count', ascending=False)
-        st.write(common_targets)
+        with col1:
+            st.write("Best File에서의 빈도수:")
+            st.write(target_counts_best)
+        with col2:
+            st.write("Current File에서의 빈도수:")
+            st.write(target_counts_current)
+        with col3:
+            common_targets = pd.DataFrame({
+                'Best File Count': target_counts_best,
+                'Current File Count': target_counts_current
+            }).astype(int).sort_values(by='Best File Count', ascending=False)
+            st.write(common_targets)
         
         # 3. 못 맞춘 정답 빈도수
         st.write("3. 못 맞춘 정답 빈도수:")
-        
-        # target_best에서 label과 다른 값들의 수
-        wrong_label_best = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
-        st.write("Best File에서의 빈도수:")
-        st.write(wrong_label_best)
-
-        # target_current에서 label과 다른 값들의 수
-        wrong_label_current = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
-        st.write("Current File에서의 빈도수:")
-        st.write(wrong_label_current)
-
-        # 전체적으로 틀린 label 수
-        all_wrong_labels = changed_df['label'].value_counts().sort_values(ascending=False)
-        st.write("전체적으로 틀린 label 수:")
-        st.write(all_wrong_labels)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            # target_best에서 label과 다른 값들의 수
+            wrong_label_best = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
+            st.write("Best File에서의 빈도수:")
+            st.write(wrong_label_best)
+        with col1:
+            # target_current에서 label과 다른 값들의 수
+            wrong_label_current = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
+            st.write("Current File에서의 빈도수:")
+            st.write(wrong_label_current)
+        with col1:
+            # 전체적으로 틀린 label 수
+            all_wrong_labels = changed_df['label'].value_counts().sort_values(ascending=False)
+            st.write("전체적으로 틀린 label 수:")
+            st.write(all_wrong_labels)
         
         # 4. target_best, target_current, label 조합의 빈도수
         st.write("4. target_best, target_current, label 조합의 빈도수:")
