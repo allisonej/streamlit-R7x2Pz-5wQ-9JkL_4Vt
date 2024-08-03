@@ -40,7 +40,8 @@ def process_files(uploaded_file, answer_key):
         with col4:
             st.write("[target, label] 조합의 빈도수:")
             pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='Count')
-            st.write(pair_counts)
+            pair_counts_sorted = pair_counts.sort_values(by='Count', ascending=False)
+            st.write(pair_counts_sorted)
 
         # 결과를 CSV로 저장
         changed_df.to_csv('compare_asr.csv', index=False)
@@ -50,7 +51,7 @@ def process_files(uploaded_file, answer_key):
             file_name='compare_asr.csv'
         )
 
-        pair_counts.to_csv('target_label_pair.csv', index=False)
+        pair_counts_sorted.to_csv('pair.csv', index=False)
         st.download_button(
             label="Download Pair CSV",
             data=open('pair.csv', 'rb').read(),
