@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
-from io import StringIO
+from io import StringIO, BytesIO
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
@@ -11,6 +11,8 @@ def load_answer_key(url):
     # 구글 시트에서 정답 데이터를 CSV로 읽어오기
     response = requests.get(url)
     answer_key = pd.read_csv(StringIO(response.text))
+    # ID 열의 데이터 타입을 문자열로 변환
+    answer_key['ID'] = answer_key['ID'].astype(str)
     return answer_key
 
 def process_files(uploaded_files, answer_key):
@@ -20,17 +22,22 @@ def process_files(uploaded_files, answer_key):
         user_df = pd.read_csv(file)
         # 파일에 대한 target 컬럼 이름 생성
         user_df.rename(columns={'target': f'target_{i+1}'}, inplace=True)
+        # ID 열의 데이터 타입을 문자열로 변환
+        user_df['ID'] = user_df['ID'].astype(str)
         all_data.append(user_df)
     
     # 모든 파일 데이터를 하나로 결합 (ID 기준)
-    user_df_combined = pd.concat(all_data, axis=1, join='inner').drop_duplicates(subset='ID')
+    user_df_combined = pd.concat(all_data, axis=1).drop_duplicates(subset='ID')
+    # ID 열의 데이터 타입을 문자열로 변환
+    user_df_combined['ID'] = user_df_combined['ID'].astype(str)
     
     # 정답지와 병합
     merged_df = pd.merge(user_df_combined, answer_key, on='ID', how='left')
     
     # 모든 target 컬럼과 label을 비교
-    conditions = [merged_df[f'target_{i+1}'] != merged_df['label'] for i in range(len(uploaded_files))]
-    merged_df['target_mismatch'] = pd.concat(conditions, axis=1).any(axis=1)
+    merged_df['target_mismatch'] = False
+    for i in range(len(uploaded_files)):
+        merged_df['target_mismatch'] |= (merged_df[f'target_{i+1}'] != merged_df['label'])
     
     # target과 label이 다른 항목만 필터링
     changed_df = merged_df[merged_df['target_mismatch']]
@@ -44,10 +51,11 @@ def process_files(uploaded_files, answer_key):
             st.write("ID와 각 파일의 예측값, 정답:")
             st.dataframe(changed_df[['ID'] + [f'target_{i+1}' for i in range(len(uploaded_files))] + ['label']])
             # 결과를 CSV로 저장
-            changed_df.to_csv('compare_asr.csv', index=False)
+            csv_buffer = BytesIO()
+            changed_df.to_csv(csv_buffer, index=False)
             st.download_button(
                 label="Download Result CSV",
-                data=open('compare_asr.csv', 'rb').read(),
+                data=csv_buffer.getvalue(),
                 file_name='compare_asr.csv'
             )
         
@@ -70,10 +78,11 @@ def process_files(uploaded_files, answer_key):
             pair_counts_sorted = pair_counts.sort_values(by='Count', ascending=False)
             st.write(pair_counts_sorted)
             # 결과를 CSV로 저장
-            pair_counts_sorted.to_csv('pair.csv', index=False)
+            csv_buffer = BytesIO()
+            pair_counts_sorted.to_csv(csv_buffer, index=False)
             st.download_button(
                 label="Download Pair CSV",
-                data=open('pair.csv', 'rb').read(),
+                data=csv_buffer.getvalue(),
                 file_name='pair.csv'
             )
     else:
@@ -97,7 +106,9 @@ if 'uploaded_files' not in st.session_state:
 uploaded_files = st.file_uploader("Choose CSV files", type="csv", accept_multiple_files=True)
 
 if uploaded_files:
+    # 파일이 업로드되면 세션 상태를 업데이트하고 페이지를 리프레시
     st.session_state.uploaded_files = uploaded_files
+    st.experimental_rerun()  # 페이지를 리프레시
 
 # 업로드된 파일들을 정답지와 비교하여 처리
 if st.session_state.uploaded_files:
