@@ -9,6 +9,7 @@ sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDb
 
 @st.cache_data
 def load_answer_key(url):
+    """Load answer key from Google Sheets."""
     response = requests.get(url)
     return pd.read_csv(StringIO(response.text))
 
@@ -40,11 +41,13 @@ def calculate_missing_values(changed_df):
     """Calculate missing values in the changed dataframe."""
     return changed_df[['target_best', 'target_current', 'label']].isna().sum()
 
-def calculate_statistics(changed_df):
+def calculate_statistics(changed_df, answer_df, current_df):
     """Calculate and return statistics for the changed dataframe."""
     total_rows = len(changed_df)
     unique_ids = changed_df['ID'].nunique()
-    return total_rows, unique_ids
+    answer_ids = answer_df['ID'].nunique()  # 정답지의 고유 ID 수
+    current_ids = current_df['ID'].nunique()  # 현재 파일의 고유 ID 수
+    return total_rows, unique_ids, answer_ids, current_ids
 
 def calculate_metrics(y_true, y_scores):
     """Calculate precision, recall, and F1-score for given predictions."""
@@ -127,7 +130,6 @@ def display_metrics_results(metrics_best, metrics_current):
         
         **단점**:
         - 특정 클래스의 성능이 전체 성능에 덜 반영될 수 있습니다.
-        
         """ if all(v is not None for v in metrics_best.values()) and all(v is not None for v in metrics_current.values()) else """
         **Best File:**
         - Precision: Precision 계산 불가  
@@ -174,8 +176,6 @@ def display_metrics_results(metrics_best, metrics_current):
         - F1-Score: F1-Score 계산 불가  
         """)
 
-
-
 def process_evaluation(changed_df):
     """Process evaluation metrics for given dataframe."""
     if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
@@ -189,7 +189,7 @@ def process_evaluation(changed_df):
         metrics_current = calculate_metrics(y_true, y_scores_current)
         display_metrics_results(metrics_best, metrics_current)
 
-def display_results(changed_df):
+def display_results(changed_df, answer_df, current_df):
     """Display various results for the changed dataframe."""
     if not changed_df.empty:
         st.write("정답이 틀린 항목에 대한 분석표입니다.")
@@ -202,11 +202,13 @@ def display_results(changed_df):
         with col2:
             # 빈 칸인 값들의 수 출력
             missing_values_summary = calculate_missing_values(changed_df)
-            total_rows, unique_ids = calculate_statistics(changed_df)
+            total_rows, unique_ids, answer_ids, current_ids = calculate_statistics(changed_df, answer_df, current_df)
             st.write("빈 칸인 값들의 수:")
             st.write(missing_values_summary)
             st.write("전체 행의 수:", total_rows)
             st.write("고유한 ID의 수:", unique_ids)
+            st.write("정답지의 고유한 ID 수:", answer_ids)
+            st.write("현재 파일의 고유한 ID 수:", current_ids)
 
         # 2. 틀린 예측값 빈도수
         st.write("2. 틀린 예측값 빈도수:")
@@ -256,7 +258,7 @@ def process_files(best_file, current_file, answer_key):
     best_df, current_df = read_files(best_file, current_file)
     merged_df = merge_dataframes(best_df, current_df, answer_key)
     changed_df = calculate_mismatch(merged_df)
-    return changed_df
+    return changed_df, best_df, current_df
 
 # Streamlit 앱의 레이아웃 설정
 st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
@@ -283,7 +285,7 @@ tabs = st.tabs(["평가지표", "통계표"])
 if best_file and current_file:
     if st.button("Process Files"):
         answer_key = load_answer_key(sheet_url)
-        changed_df = process_files(best_file, current_file, answer_key)
+        changed_df, best_df, current_df = process_files(best_file, current_file, answer_key)
 
         with tabs[0]:
             st.header("평가지표")
@@ -291,4 +293,4 @@ if best_file and current_file:
         
         with tabs[1]:
             st.header("통계표")
-            display_results(changed_df)
+            display_results(changed_df, answer_key, current_df)
