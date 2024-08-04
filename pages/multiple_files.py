@@ -225,13 +225,8 @@ def display_results(changed_df, answer_df, current_df):
             common_targets = pd.DataFrame({
                 'Best File Count': target_counts_best,
                 'Current File Count': target_counts_current
-            })
+            }).fillna(0).astype(int).sort_values(by='Best File Count', ascending=False) # 툭정 값으로 예상한것중 틀린게 없을 경우 0으로 채움 (오류 해결)
             st.write(common_targets)
-
-            # NaN 값 포함하는 행 확인
-            na_rows = common_targets[common_targets.isna().any(axis=1)]
-            st.write("NaN 값을 포함하는 행:")
-            st.write(na_rows)
 
         # 3. 못 맞춘 정답 빈도수
         st.write("3. 못 맞춘 정답 빈도수:")
