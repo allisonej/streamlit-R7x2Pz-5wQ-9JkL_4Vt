@@ -24,10 +24,10 @@ def process_files(uploaded_file, answer_key):
     # 분석 결과 출력
     if not changed_df.empty:
         st.write("정답이 틀린 항목에 대한 분석표입니다.")
+        st.write(f"총 틀린 항목 수: ",len(changed_df))  # 틀린 항목 수 추가
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.write(f"총 틀린 항목 수: ",len(changed_df))  # 틀린 항목 수 추가
             st.write("ID, 예측값, 정답:")
             st.dataframe(changed_df[['ID', 'target', 'label']])
             # 결과를 CSV로 저장
