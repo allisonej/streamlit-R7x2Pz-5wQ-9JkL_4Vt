@@ -77,12 +77,12 @@ def display_metrics_results(metrics_best, metrics_current):
         **Best File:**
         - Precision: {metrics_best['precision_macro']:.3f}  
         - Recall: {metrics_best['recall_macro']:.3f}  
-        - **<span style='color: red;'>F1-Score: {metrics_best['f1_macro']:.3f}</span>**  
+        - **F1-Score: {metrics_best['f1_macro']:.3f}**  
         
         **Current File:**
         - Precision: {metrics_current['precision_macro']:.3f}  
         - Recall: {metrics_current['recall_macro']:.3f}  
-        - **<span style='color: red;'>F1-Score: {metrics_current['f1_macro']:.3f}</span>**  
+        - **F1-Score: {metrics_current['f1_macro']:.3f}**  
 
         **Macro 평균**은 각 클래스의 지표를 개별적으로 계산한 후, 그 평균을 구하는 방법입니다.
         이 방법은 클래스 간 불균형을 무시하고 각 클래스의 중요성을 동등하게 고려합니다. 즉, 각 클래스가 동등한 가중치를 가지며 평가됩니다.
@@ -127,6 +127,7 @@ def display_metrics_results(metrics_best, metrics_current):
         
         **단점**:
         - 특정 클래스의 성능이 전체 성능에 덜 반영될 수 있습니다.
+        
         """ if all(v is not None for v in metrics_best.values()) and all(v is not None for v in metrics_current.values()) else """
         **Best File:**
         - Precision: Precision 계산 불가  
@@ -172,7 +173,6 @@ def display_metrics_results(metrics_best, metrics_current):
         - Recall: Recall 계산 불가  
         - F1-Score: F1-Score 계산 불가  
         """)
-
 
 
 
