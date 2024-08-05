@@ -262,28 +262,20 @@ def process_files(best_file, current_file, answer_key):
     changed_df = calculate_mismatch(merged_df)
     return changed_df, best_df, current_df
 
-def plot_histogram(df):
+def plot_bar_graph(df):
     plt.figure(figsize=(14, 7))
-    plt.subplot(3, 1, 1)
-    sns.histplot(df['target_best'].dropna(), bins=17, kde=False, color='blue')
-    plt.xlim(0, 16)
-    plt.title('Distribution of target_best')
-    plt.xlabel('Value')
-    plt.ylabel('Count')
     
-    plt.subplot(3, 1, 2)
-    sns.histplot(df['target_current'].dropna(), bins=17, kde=False, color='green')
-    plt.xlim(0, 16)
-    plt.title('Distribution of target_current')
-    plt.xlabel('Value')
-    plt.ylabel('Count')
+    # Data preparation
+    data = pd.melt(df[['target_best', 'target_current', 'label']], var_name='Category', value_name='Value')
     
-    plt.subplot(3, 1, 3)
-    sns.histplot(df['label'].dropna(), bins=17, kde=False, color='red')
+    # Plotting bar graph
+    sns.histplot(data, x='Value', hue='Category', multiple='stack', bins=17, palette=['blue', 'green', 'red'])
+    
     plt.xlim(0, 16)
-    plt.title('Distribution of label')
+    plt.title('Distribution of target_best, target_current, and label')
     plt.xlabel('Value')
     plt.ylabel('Count')
+    plt.legend(title='Category')
     
     plt.tight_layout()
     st.pyplot()
@@ -332,7 +324,7 @@ if best_file and current_file:
 
         with tabs[2]:
             st.header("그래프")
-            plot_histogram(changed_df)
+            plot_bar_graph(changed_df)
 
         with tabs[3]:
             st.header("레이블 필터링")
