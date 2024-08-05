@@ -260,6 +260,39 @@ def process_files(best_file, current_file, answer_key):
     changed_df = calculate_mismatch(merged_df)
     return changed_df, best_df, current_df
 
+def plot_histogram(df):
+    plt.figure(figsize=(14, 7))
+    plt.subplot(3, 1, 1)
+    sns.histplot(df['target_best'].dropna(), bins=17, kde=False, color='blue')
+    plt.xlim(0, 16)
+    plt.title('Distribution of target_best')
+    plt.xlabel('Value')
+    plt.ylabel('Count')
+    
+    plt.subplot(3, 1, 2)
+    sns.histplot(df['target_current'].dropna(), bins=17, kde=False, color='green')
+    plt.xlim(0, 16)
+    plt.title('Distribution of target_current')
+    plt.xlabel('Value')
+    plt.ylabel('Count')
+    
+    plt.subplot(3, 1, 3)
+    sns.histplot(df['label'].dropna(), bins=17, kde=False, color='red')
+    plt.xlim(0, 16)
+    plt.title('Distribution of label')
+    plt.xlabel('Value')
+    plt.ylabel('Count')
+    
+    plt.tight_layout()
+    st.pyplot()
+
+def filter_by_label(df):
+    unique_labels = df['label'].dropna().unique()
+    selected_label = st.selectbox('Select Actual Label for Filtering', options=unique_labels)
+    filtered_df = df[df['label'] == selected_label]
+    st.write(f"Filtered data for label: {selected_label}")
+    st.dataframe(filtered_df[['ID', 'target_best', 'target_current', 'label']])
+    
 # Streamlit 앱의 레이아웃 설정
 st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
 
@@ -294,3 +327,11 @@ if best_file and current_file:
         with tabs[1]:
             st.header("통계표")
             display_results(changed_df, answer_key, current_df)
+
+        with tabs[2]:
+            st.header("그래프")
+            plot_histogram(changed_df)
+
+        with tabs[3]:
+            st.header("레이블 필터링")
+            filter_by_label(changed_df)
