@@ -313,7 +313,7 @@ with col2:
     current_file = st.file_uploader("Upload Current File (CSV)", type="csv")
 
 # 탭 생성
-tabs = st.tabs(["평가지표", "통계표"])
+tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링"])
 
 if best_file and current_file:
     if st.button("Process Files"):
