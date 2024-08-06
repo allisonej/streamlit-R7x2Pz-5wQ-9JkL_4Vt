@@ -301,20 +301,41 @@ if best_file and current_file:
             st.header("그래프")
             plt.figure(figsize=(14, 7))
     
-            # Data preparation
-            data = pd.melt(changed_df[['target_best', 'target_current', 'label']], var_name='Category', value_name='Value')
-            
-            # Plotting bar graph
-            sns.histplot(data, x='Value', hue='Category', multiple='stack', bins=17, palette=['blue', 'green', 'red'])
-            
-            plt.xlim(0, 16)
-            plt.title('Distribution of target_best, target_current, and label')
-            plt.xlabel('Value')
-            plt.ylabel('Count')
-            plt.legend(title='Category')
-            
+            # 예시 데이터 생성
+            np.random.seed(0)  # 랜덤 시드 고정
+            labels = list(range(17))  # 0부터 16까지의 항목
+
+            # 데이터 준비
+            a = changed_df['target_best'].value_counts().reindex(labels, fill_value=0)
+            b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
+            c = changed_df['label'].value_counts().reindex(labels, fill_value=0)
+
+            colors = sns.color_palette("pastel") 
+
+            # 막대의 위치와 너비 설정
+            x = np.arange(len(labels))
+            width = 0.25  # 막대 너비
+
+            # 그룹화된 막대그래프를 그리기 위한 위치 설정
+            fig, ax = plt.subplots(figsize=(14, 7))
+            rects1 = ax.bar(x - width, a, width, label='target_best', color=colors[0])
+            rects2 = ax.bar(x, b, width, label='target_current', color=colors[1])
+            rects3 = ax.bar(x + width, c, width, label='label', color=colors[2])
+
+            # 레이블, 제목 및 범례 설정
+            ax.set_xlabel('Value')
+            ax.set_ylabel('Count')
+            ax.set_title('Distribution of target_best, target_current, and label')
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels)
+            ax.legend(title='Category')
+
+            # 막대그래프가 잘 보이도록 Y축 범위를 설정
+            ax.set_ylim(0, max(max(a), max(b), max(c)) + 1)
+
+            # 그래프 표시
             plt.tight_layout()
-            st.pyplot()
+            plt.show()
 
         with tabs[3]:
             st.header("레이블 필터링")
