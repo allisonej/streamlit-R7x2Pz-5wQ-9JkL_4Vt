@@ -39,17 +39,29 @@ def process_files(uploaded_file, answer_key):
             )
         
         with col2:
-            st.write("틀린 예측값 빈도수:")
-            st.write(changed_df['target'].value_counts())
+            st.write("틀린 예측값 빈도, 틀린 비율:")
+            counts = changed_df['target'].value_counts()
+            rates = counts / len(changed_df)
+            result_df = pd.DataFrame({
+                'count': counts,
+                'wrong_rate': rates
+            }) 
+            st.write(result_df)
         
         with col3:
-            st.write("못 맞춘 정답 빈도수:")
-            st.write(changed_df['label'].value_counts())
+            st.write("못 맞춘 정답 빈도, 틀린 비율:")
+            counts = changed_df['label'].value_counts()
+            rates = counts / len(changed_df)
+            result_df = pd.DataFrame({
+                'count': counts,
+                'wrong_rate': rates
+            }) 
+            st.write(result_df)
         
         with col4:
             st.write("[예측값, 정답] 조합의 빈도수:")
-            pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='Count')
-            pair_counts_sorted = pair_counts.sort_values(by='Count', ascending=False)
+            pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='count')
+            pair_counts_sorted = pair_counts.sort_values(by='count', ascending=False)
             st.write(pair_counts_sorted)
             # 결과를 CSV로 저장
             pair_counts_sorted.to_csv('pair.csv', index=False)
