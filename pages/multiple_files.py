@@ -311,17 +311,15 @@ if best_file and current_file:
             b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
             c = changed_df['label'].value_counts().reindex(labels, fill_value=0)
 
-            colors = sns.color_palette("pastel") 
-
             # 막대의 위치와 너비 설정
             x = np.arange(len(labels))
             width = 0.25  # 막대 너비
 
             # 그룹화된 막대그래프를 그리기 위한 위치 설정
             fig, ax = plt.subplots(figsize=(14, 7))
-            rects1 = ax.bar(x - width, a, width, label='target_best', color=colors[0])
-            rects2 = ax.bar(x, b, width, label='target_current', color=colors[1])
-            rects3 = ax.bar(x + width, c, width, label='label', color=colors[2])
+            rects1 = ax.bar(x - width, a, width, label='target_best', color='red')
+            rects2 = ax.bar(x, b, width, label='target_current', color='blue')
+            rects3 = ax.bar(x + width, c, width, label='label', color='purple')
 
             # 레이블, 제목 및 범례 설정
             ax.set_xlabel('Value')
