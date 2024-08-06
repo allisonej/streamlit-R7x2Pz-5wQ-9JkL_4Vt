@@ -178,13 +178,13 @@ def display_metrics_results(metrics_best, metrics_current):
         - F1-Score: F1-Score 계산 불가  
         """)
 
-def process_evaluation(changed_df):
+def process_evaluation(merged_df):
     """Process evaluation metrics for given dataframe."""
-    if 'target_best' in changed_df.columns and 'label' in changed_df.columns:
+    if 'target_best' in merged_df.columns and 'label' in merged_df.columns:
         # 실제 클래스와 예측 클래스
-        y_true = changed_df['label'].astype(int)
-        y_scores_best = changed_df['target_best'].astype(int)
-        y_scores_current = changed_df['target_current'].astype(int)
+        y_true =  merged_df['label'].astype(int)
+        y_scores_best = merged_df['target_best'].astype(int)
+        y_scores_current = merged_df['target_current'].astype(int)
         
         # Precision, Recall, F1-Score 계산
         metrics_best = calculate_metrics(y_true, y_scores_best)
@@ -260,32 +260,7 @@ def process_files(best_file, current_file, answer_key):
     best_df, current_df = read_files(best_file, current_file)
     merged_df = merge_dataframes(best_df, current_df, answer_key)
     changed_df = calculate_mismatch(merged_df)
-    return changed_df, best_df, current_df
-
-def plot_bar_graph(df):
-    plt.figure(figsize=(14, 7))
-    
-    # Data preparation
-    data = pd.melt(df[['target_best', 'target_current', 'label']], var_name='Category', value_name='Value')
-    
-    # Plotting bar graph
-    sns.histplot(data, x='Value', hue='Category', multiple='stack', bins=17, palette=['blue', 'green', 'red'])
-    
-    plt.xlim(0, 16)
-    plt.title('Distribution of target_best, target_current, and label')
-    plt.xlabel('Value')
-    plt.ylabel('Count')
-    plt.legend(title='Category')
-    
-    plt.tight_layout()
-    st.pyplot()
-
-def filter_by_label(df):
-    unique_labels = df['label'].dropna().unique()
-    selected_label = st.selectbox('Select Actual Label for Filtering', options=unique_labels)
-    filtered_df = df[df['label'] == selected_label]
-    st.write(f"Filtered data for label: {selected_label}")
-    st.dataframe(filtered_df[['ID', 'target_best', 'target_current', 'label']])
+    return changed_df, best_df, current_df, merged_df
     
 # Streamlit 앱의 레이아웃 설정
 st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
@@ -312,11 +287,11 @@ tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 �
 if best_file and current_file:
     if st.button("Process Files"):
         answer_key = load_answer_key(sheet_url)
-        changed_df, best_df, current_df = process_files(best_file, current_file, answer_key)
+        changed_df, best_df, current_df, merged_df = process_files(best_file, current_file, answer_key)
 
         with tabs[0]:
             st.header("평가지표")
-            process_evaluation(changed_df)
+            process_evaluation(merged_df)
         
         with tabs[1]:
             st.header("통계표")
@@ -324,8 +299,27 @@ if best_file and current_file:
 
         with tabs[2]:
             st.header("그래프")
-            plot_bar_graph(changed_df)
+            plt.figure(figsize=(14, 7))
+    
+            # Data preparation
+            data = pd.melt(changed_df[['target_best', 'target_current', 'label']], var_name='Category', value_name='Value')
+            
+            # Plotting bar graph
+            sns.histplot(data, x='Value', hue='Category', multiple='stack', bins=17, palette=['blue', 'green', 'red'])
+            
+            plt.xlim(0, 16)
+            plt.title('Distribution of target_best, target_current, and label')
+            plt.xlabel('Value')
+            plt.ylabel('Count')
+            plt.legend(title='Category')
+            
+            plt.tight_layout()
+            st.pyplot()
 
         with tabs[3]:
             st.header("레이블 필터링")
-            filter_by_label(changed_df)
+            unique_labels = changed_df['label'].dropna().unique()
+            selected_label = st.selectbox('Select Actual Label for Filtering', options=unique_labels)
+            filtered_df = changed_df[changed_df['label'] == selected_label]
+            st.write(f"Filtered data for label: {selected_label}")
+            st.dataframe(filtered_df[['ID', 'target_best', 'target_current', 'label']])
