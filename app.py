@@ -63,7 +63,7 @@ def process_files(uploaded_file, answer_key):
             counts_combined.columns = ['wrong_count', 'total_count']
             counts_combined['rate'] = counts_combined['wrong_count'] / counts_combined['total_count']
             counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
-            st.write(counts_combined[['target', 'wrong_count','rate_view', 'rate']])
+            st.write(counts_combined[['wrong_count','rate_view', 'rate']])
         
         with col2:
             st.write("못 맞춘 정답 빈도, 틀린 비율:")
@@ -73,7 +73,7 @@ def process_files(uploaded_file, answer_key):
             counts_combined.columns = ['wrong_count', 'total_count']
             counts_combined['rate'] = counts_combined['wrong_count'] / counts_combined['total_count']
             counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
-            st.write(counts_combined[['label', 'wrong_count','rate_view', 'rate']])
+            st.write(counts_combined[['wrong_count','rate_view', 'rate']])
 
     else:
         st.write("변경된 target 값이 없습니다.")
