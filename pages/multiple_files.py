@@ -256,7 +256,7 @@ with col2:
         current_df = pd.read_csv(current_file)
         current_df.rename(columns={'target': 'target_current'}, inplace=True)
         merged_df = pd.merge(current_df, answer_key, on='ID', how='outer')
-        mismatched_df = merged_df[merged_df['target_best'] != merged_df['label']]
+        mismatched_df = merged_df[merged_df['target_current'] != merged_df['label']]
         st.write("틀린 수 : ", len(mismatched_df))
 
 if best_file and current_file:
