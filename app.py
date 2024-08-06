@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 from io import StringIO
+from sklearn.metrics import f1_score
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
@@ -23,6 +24,9 @@ def process_files(uploaded_file, answer_key):
     # 데이터 처리
     merged_df = pd.merge(user_df, answer_key, on='ID')
     changed_df = merged_df[merged_df['target'] != merged_df['label']]
+    # Macro F1 Score 계산
+    macro_f1 = f1_score(merged_df['label'], merged_df['target'], average='macro')
+    st.write(f"Macro F1 Score: {macro_f1:.2f}")
     
     # 분석 결과 출력
     if not changed_df.empty:
