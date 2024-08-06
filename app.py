@@ -28,7 +28,7 @@ def process_files(uploaded_file, answer_key):
     if not changed_df.empty:
         st.write("정답이 틀린 항목에 대한 분석표입니다.")
         st.write(f"총 틀린 항목 수: ",len(changed_df))  # 틀린 항목 수 추가
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2 = st.columns(2)
 
         with col1:
             st.write("ID, 예측값, 정답:")
@@ -42,26 +42,6 @@ def process_files(uploaded_file, answer_key):
             )
         
         with col2:
-            st.write("틀린 예측값 빈도, 틀린 비율:")
-            counts = changed_df['target'].value_counts()
-            rates = counts / len(changed_df)
-            result_df = pd.DataFrame({
-                'count': counts,
-                'wrong_rate': rates
-            }) 
-            st.write(result_df)
-        
-        with col3:
-            st.write("못 맞춘 정답 빈도, 틀린 비율:")
-            counts = changed_df['label'].value_counts()
-            rates = counts / len(changed_df)
-            result_df = pd.DataFrame({
-                'count': counts,
-                'wrong_rate': rates
-            }) 
-            st.write(result_df)
-        
-        with col4:
             st.write("[예측값, 정답] 조합의 빈도수:")
             pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='count')
             pair_counts_sorted = pair_counts.sort_values(by='count', ascending=False)
@@ -73,6 +53,27 @@ def process_files(uploaded_file, answer_key):
                 data=open('pair.csv', 'rb').read(),
                 file_name='pair.csv'
             )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write("틀린 예측값 빈도, 틀린 비율:")
+            wrong_counts = changed_df['target'].value_counts() # 예측값 틀린것 셈
+            total_counts = merged_df['target'].value_counts() # 예측값 전체 셈
+            counts_combined = pd.concat([wrong_counts, total_counts], axis=1, sort=False).fillna(0)
+            counts_combined.columns = ['wrong_count', 'total_count']
+            counts_combined['rate'] = counts_combined['wrong_count'] / counts_combined['total_count']
+            counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
+            st.write(counts_combined[['target', 'wrong_count','rate_view', 'rate']])
+        
+        with col2:
+            st.write("못 맞춘 정답 빈도, 틀린 비율:")
+            wrong_counts = changed_df['label'].value_counts() # 예측값 틀린것 셈
+            total_counts = merged_df['label'].value_counts() # 예측값 전체 셈
+            counts_combined = pd.concat([wrong_counts, total_counts], axis=1, sort=False).fillna(0)
+            counts_combined.columns = ['wrong_count', 'total_count']
+            counts_combined['rate'] = counts_combined['wrong_count'] / counts_combined['total_count']
+            counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
+            st.write(counts_combined[['label', 'wrong_count','rate_view', 'rate']])
 
     else:
         st.write("변경된 target 값이 없습니다.")
