@@ -18,7 +18,7 @@ def process_files(uploaded_file, answer_key):
     user_df = pd.read_csv(uploaded_file)
 
     st.write("업로드 파일 ID: ", len(user_df), "\t정답 파일 ID: ", len(answer_key))
-    st.write("na? : ", user_df.isna().sum())
+    st.write("target na? : ", user_df['target'].isna().sum())
     # 데이터 처리
     merged_df = pd.merge(user_df, answer_key, on='ID')
     changed_df = merged_df[merged_df['target'] != merged_df['label']]
