@@ -11,38 +11,6 @@ import numpy as np
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
 
 @st.cache_data
-def load_answer_key(url):
-    """Load answer key from Google Sheets."""
-    response = requests.get(url)
-    return pd.read_csv(StringIO(response.text))
-
-def read_files(best_file, current_file):
-    """Read CSV files and rename 'target' columns."""
-    best_df = pd.read_csv(best_file)
-    current_df = pd.read_csv(current_file)
-    
-    best_df.rename(columns={'target': 'target_best'}, inplace=True)
-    current_df.rename(columns={'target': 'target_current'}, inplace=True)
-    
-    return best_df, current_df
-
-def merge_dataframes(best_df, current_df, answer_key):
-    """Merge best and current dataframes and then merge with answer key."""
-    combined_df = pd.merge(best_df, current_df, on='ID', how='outer')
-    merged_df = pd.merge(combined_df, answer_key, on='ID', how='left')
-    return merged_df
-
-def calculate_mismatch(merged_df):
-    """Identify rows where target values mismatch with the label."""
-    target_columns = ['target_best', 'target_current']
-    mismatch_conditions = [merged_df[col] != merged_df['label'] for col in target_columns]
-    merged_df['target_mismatch'] = pd.concat(mismatch_conditions, axis=1).any(axis=1)
-    changed_df = merged_df[merged_df['target_mismatch']]
-    return changed_df
-
-def calculate_missing_values(changed_df):
-    """Calculate missing values in the changed dataframe."""
-    return changed_df[['target_best', 'target_current', 'label']].isna().sum()
 
 def calculate_statistics(changed_df, answer_df, current_df):
     """Calculate and return statistics for the changed dataframe."""
@@ -204,7 +172,7 @@ def display_results(changed_df, answer_df, current_df):
             st.dataframe(changed_df[['ID', 'target_best', 'target_current', 'label']])
         with col2:
             # 빈 칸인 값들의 수 출력
-            missing_values_summary = calculate_missing_values(changed_df)
+            missing_values_summary = changed_df[['target_best', 'target_current', 'label']].isna().sum()
             total_rows, unique_ids, answer_ids, current_ids = calculate_statistics(changed_df, answer_df, current_df)
             st.write("빈 칸인 값들의 수:")
             st.write(missing_values_summary)
@@ -256,12 +224,6 @@ def display_results(changed_df, answer_df, current_df):
         st.dataframe(pair_counts.sort_values(by='Count', ascending=False))
     else:
         st.write("변경된 target 값이 없습니다.")
-
-def process_files(best_file, current_file, answer_key):
-    best_df, current_df = read_files(best_file, current_file)
-    merged_df = merge_dataframes(best_df, current_df, answer_key)
-    changed_df = calculate_mismatch(merged_df)
-    return changed_df, best_df, current_df, merged_df
     
 # Streamlit 앱의 레이아웃 설정
 st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
@@ -273,21 +235,42 @@ st.title("CSV File Grader and Analyzer")
 
 st.write("업로드할 CSV 파일들을 선택하세요.")
 
+# get answer
+response = requests.get(sheet_url)
+answer_key = pd.read_csv(StringIO(response.text))
+
 # 파일 업로드
 col1, col2 = st.columns(2)
 
 with col1:
     best_file = st.file_uploader("Upload Best File (CSV)", type="csv")
-
+    if best_file:
+        best_df = pd.read_csv(best_file)
+        best_df.rename(columns={'target': 'target_best'}, inplace=True)
+        merged_df = pd.merge(best_df, answer_key, on='ID', how='outer')
+        mismatched_df = merged_df[merged_df['target_best'] != merged_df['label']]
+        st.write("틀린 수 : ", len(mismatched_df))
 with col2:
     current_file = st.file_uploader("Upload Current File (CSV)", type="csv")
-
-# 탭 생성
-tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링"])
+    if current_file:
+        current_df = pd.read_csv(current_file)
+        current_df.rename(columns={'target': 'target_current'}, inplace=True)
+        merged_df = pd.merge(current_df, answer_key, on='ID', how='outer')
+        mismatched_df = merged_df[merged_df['target_best'] != merged_df['label']]
+        st.write("틀린 수 : ", len(mismatched_df))
 
 if best_file and current_file:
-    answer_key = load_answer_key(sheet_url)
-    changed_df, best_df, current_df, merged_df = process_files(best_file, current_file, answer_key)
+
+    combined_df = pd.merge(best_df, current_df, on='ID', how='outer')
+    merged_df = pd.merge(combined_df, answer_key, on='ID', how='left')
+
+    target_columns = ['target_best', 'target_current']
+    mismatch_conditions = [merged_df[col] != merged_df['label'] for col in target_columns]
+    merged_df['target_mismatch'] = pd.concat(mismatch_conditions, axis=1).any(axis=1)
+    changed_df = merged_df[merged_df['target_mismatch']]
+
+    # 탭 생성
+    tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링"])
 
     with tabs[0]:
         st.header("평가지표")
@@ -302,7 +285,6 @@ if best_file and current_file:
         plt.figure(figsize=(14, 7))
 
         # 예시 데이터 생성
-        np.random.seed(0)  # 랜덤 시드 고정
         labels = list(range(17))  # 0부터 16까지의 항목
 
         # 데이터 준비
