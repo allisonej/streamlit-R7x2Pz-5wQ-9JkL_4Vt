@@ -5,6 +5,7 @@ from io import StringIO
 from sklearn.metrics import precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
