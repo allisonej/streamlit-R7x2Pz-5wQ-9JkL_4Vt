@@ -286,59 +286,58 @@ with col2:
 tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링"])
 
 if best_file and current_file:
-    if st.button("Process Files"):
-        answer_key = load_answer_key(sheet_url)
-        changed_df, best_df, current_df, merged_df = process_files(best_file, current_file, answer_key)
+    answer_key = load_answer_key(sheet_url)
+    changed_df, best_df, current_df, merged_df = process_files(best_file, current_file, answer_key)
 
-        with tabs[0]:
-            st.header("평가지표")
-            process_evaluation(merged_df)
-        
-        with tabs[1]:
-            st.header("통계표")
-            display_results(changed_df, answer_key, current_df)
-
-        with tabs[2]:
-            st.header("그래프")
-            plt.figure(figsize=(14, 7))
+    with tabs[0]:
+        st.header("평가지표")
+        process_evaluation(merged_df)
     
-            # 예시 데이터 생성
-            np.random.seed(0)  # 랜덤 시드 고정
-            labels = list(range(17))  # 0부터 16까지의 항목
+    with tabs[1]:
+        st.header("통계표")
+        display_results(changed_df, answer_key, current_df)
 
-            # 데이터 준비
-            a = changed_df['target_best'].value_counts().reindex(labels, fill_value=0)
-            b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
-            c = changed_df['label'].value_counts().reindex(labels, fill_value=0)
+    with tabs[2]:
+        st.header("그래프")
+        plt.figure(figsize=(14, 7))
 
-            # 막대의 위치와 너비 설정
-            x = np.arange(len(labels))
-            width = 0.25  # 막대 너비
+        # 예시 데이터 생성
+        np.random.seed(0)  # 랜덤 시드 고정
+        labels = list(range(17))  # 0부터 16까지의 항목
 
-            # 그룹화된 막대그래프를 그리기 위한 위치 설정
-            fig, ax = plt.subplots(figsize=(14, 7))
-            rects1 = ax.bar(x - width, a, width, label='target_best', color='red')
-            rects2 = ax.bar(x, b, width, label='target_current', color='blue')
-            rects3 = ax.bar(x + width, c, width, label='label', color='purple')
+        # 데이터 준비
+        a = changed_df['target_best'].value_counts().reindex(labels, fill_value=0)
+        b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
+        c = changed_df['label'].value_counts().reindex(labels, fill_value=0)
 
-            # 레이블, 제목 및 범례 설정
-            ax.set_xlabel('Value')
-            ax.set_ylabel('Count')
-            ax.set_title('Distribution of target_best, target_current, and label')
-            ax.set_xticks(x)
-            ax.set_xticklabels(labels)
-            ax.legend(title='Category')
+        # 막대의 위치와 너비 설정
+        x = np.arange(len(labels))
+        width = 0.25  # 막대 너비
 
-            # 막대그래프가 잘 보이도록 Y축 범위를 설정
-            ax.set_ylim(0, max(max(a), max(b), max(c)) + 1)
+        # 그룹화된 막대그래프를 그리기 위한 위치 설정
+        fig, ax = plt.subplots(figsize=(14, 7))
+        rects1 = ax.bar(x - width, a, width, label='target_best', color='red')
+        rects2 = ax.bar(x, b, width, label='target_current', color='blue')
+        rects3 = ax.bar(x + width, c, width, label='label', color='purple')
 
-            # 그래프 표시
-            st.pyplot(fig)
+        # 레이블, 제목 및 범례 설정
+        ax.set_xlabel('Value')
+        ax.set_ylabel('Count')
+        ax.set_title('Distribution of target_best, target_current, and label')
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels)
+        ax.legend(title='Category')
 
-        with tabs[3]:
-            st.header("레이블 필터링")
-            unique_labels = changed_df['label'].dropna().unique()
-            selected_label = st.selectbox('Select Actual Label for Filtering', options=unique_labels)
-            filtered_df = changed_df[changed_df['label'] == selected_label]
-            st.write(f"Filtered data for label: {selected_label}")
-            st.dataframe(filtered_df[['ID', 'target_best', 'target_current', 'label']])
+        # 막대그래프가 잘 보이도록 Y축 범위를 설정
+        ax.set_ylim(0, max(max(a), max(b), max(c)) + 1)
+
+        # 그래프 표시
+        st.pyplot(fig)
+
+    with tabs[3]:
+        st.header("레이블 필터링")
+        unique_labels = changed_df['label'].dropna().unique()
+        selected_label = st.selectbox('Select Actual Label for Filtering', options=unique_labels)
+        filtered_df = changed_df[changed_df['label'] == selected_label]
+        st.write(f"Filtered data for label: {selected_label}")
+        st.dataframe(filtered_df[['ID', 'target_best', 'target_current', 'label']])
