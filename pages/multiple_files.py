@@ -80,14 +80,14 @@ def display_metrics_results(metrics_best, metrics_current):
         st.write("**Macro 평균**")
         st.markdown(f"""
         **Best File:**
-        - Precision: {metrics_best['precision_macro']:.3f}  
-        - Recall: {metrics_best['recall_macro']:.3f}  
-        - **F1-Score: {metrics_best['f1_macro']:.3f}**  
+        - Precision: {metrics_best['precision_macro']:.4f}  
+        - Recall: {metrics_best['recall_macro']:.4f}  
+        - **F1-Score: {metrics_best['f1_macro']:.4f}**  
         
         **Current File:**
-        - Precision: {metrics_current['precision_macro']:.3f}  
-        - Recall: {metrics_current['recall_macro']:.3f}  
-        - **F1-Score: {metrics_current['f1_macro']:.3f}**  
+        - Precision: {metrics_current['precision_macro']:.4f}  
+        - Recall: {metrics_current['recall_macro']:.4f}  
+        - **F1-Score: {metrics_current['f1_macro']:.4f}**  
 
         **Macro 평균**은 각 클래스의 지표를 개별적으로 계산한 후, 그 평균을 구하는 방법입니다.
         이 방법은 클래스 간 불균형을 무시하고 각 클래스의 중요성을 동등하게 고려합니다. 즉, 각 클래스가 동등한 가중치를 가지며 평가됩니다.
@@ -114,14 +114,14 @@ def display_metrics_results(metrics_best, metrics_current):
         st.write("**Micro 평균**")
         st.markdown(f"""
         **Best File:**
-        - Precision: {metrics_best['precision_micro']:.3f}  
-        - Recall: {metrics_best['recall_micro']:.3f}  
-        - F1-Score: {metrics_best['f1_micro']:.3f}  
+        - Precision: {metrics_best['precision_micro']:.4f}  
+        - Recall: {metrics_best['recall_micro']:.4f}  
+        - F1-Score: {metrics_best['f1_micro']:.4f}  
         
         **Current File:**
-        - Precision: {metrics_current['precision_micro']:.3f}  
-        - Recall: {metrics_current['recall_micro']:.3f}  
-        - F1-Score: {metrics_current['f1_micro']:.3f}  
+        - Precision: {metrics_current['precision_micro']:.4f}  
+        - Recall: {metrics_current['recall_micro']:.4f}  
+        - F1-Score: {metrics_current['f1_micro']:.4f}  
 
         **Micro 평균**은 전체 데이터의 지표를 계산하여, 각 클래스의 지표를 집계하는 방법입니다.
         이 방법은 데이터 샘플의 총합에 기반하여 지표를 계산하므로, 클래스 간의 불균형에 영향을 받지 않습니다.
@@ -148,14 +148,14 @@ def display_metrics_results(metrics_best, metrics_current):
         st.write("**Weighted 평균**")
         st.markdown(f"""        
         **Best File:**
-        - Precision: {metrics_best['precision_weighted']:.3f}  
-        - Recall: {metrics_best['recall_weighted']:.3f}  
-        - F1-Score: {metrics_best['f1_weighted']:.3f}  
+        - Precision: {metrics_best['precision_weighted']:.4f}  
+        - Recall: {metrics_best['recall_weighted']:.4f}  
+        - F1-Score: {metrics_best['f1_weighted']:.4f}  
         
         **Current File:**
-        - Precision: {metrics_current['precision_weighted']:.3f}  
-        - Recall: {metrics_current['recall_weighted']:.3f}  
-        - F1-Score: {metrics_current['f1_weighted']:.3f}  
+        - Precision: {metrics_current['precision_weighted']:.4f}  
+        - Recall: {metrics_current['recall_weighted']:.4f}  
+        - F1-Score: {metrics_current['f1_weighted']:.4f}  
 
         **Weighted 평균**은 각 클래스의 지표를 계산한 후, 클래스의 샘플 수에 따라 가중 평균을 구하는 방법입니다.
         이 방법은 클래스의 샘플 수를 고려하여 지표를 조정합니다. 클래스 불균형을 반영하여, 더 많은 샘플을 가진 클래스에 더 많은 가중치를 부여합니다.
