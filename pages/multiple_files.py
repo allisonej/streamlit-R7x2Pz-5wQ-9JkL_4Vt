@@ -335,8 +335,7 @@ if best_file and current_file:
             ax.set_ylim(0, max(max(a), max(b), max(c)) + 1)
 
             # 그래프 표시
-            plt.tight_layout()
-            plt.show()
+            st.pyplot(fig)
 
         with tabs[3]:
             st.header("레이블 필터링")
