@@ -26,7 +26,7 @@ def process_files(uploaded_file, answer_key):
     changed_df = merged_df[merged_df['target'] != merged_df['label']]
     # Macro F1 Score 계산
     macro_f1 = f1_score(merged_df['label'], merged_df['target'], average='macro')
-    st.write(f"Macro F1 Score: {macro_f1:.2f}")
+    st.markdown(f"Macro F1 Score: **:blue[{macro_f1:.4f}]**")
     
     # 분석 결과 출력
     if not changed_df.empty:
