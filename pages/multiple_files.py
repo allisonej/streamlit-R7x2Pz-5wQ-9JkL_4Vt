@@ -243,21 +243,14 @@ st.title("CSV File Grader and Analyzer")
 st.write("업로드할 CSV 파일들을 선택하세요.")
 
 @st.cache_data
-def load_answer_key(url):
+def load_key(url):
     # 구글 시트에서 정답 데이터를 CSV로 읽어오기
     response = requests.get(url)
-    answer_key = pd.read_csv(StringIO(response.text))
-    return answer_key
+    key = pd.read_csv(StringIO(response.text))
+    return key
 
-@st.cache_data
-def load_meta_key(url):
-    # 구글 시트에서 메타 데이터를 CSV로 읽어오기
-    response = requests.get(url)
-    meta_key = pd.read_csv(StringIO(response.text))
-    return meta_key
-
-answer_key = load_answer_key(sheet_url)
-meta_key = load_meta_key(meta_url)
+answer_key = load_key(sheet_url)
+meta_key = load_key(meta_url)
 
 # 파일 업로드
 col1, col2 = st.columns(2)
@@ -290,9 +283,10 @@ if best_file and current_file:
     changed_df = merged_df[merged_df['target_mismatch']]
 
     # meta_key를 적용하여 변환
-    for column in target_columns+['label']:
-        merged_df[f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
-        changed_df[f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+    for column in target_columns + ['label']:
+        merged_df.loc[:, f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+        changed_df.loc[:, f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+
 
     # 탭 생성
     tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링"])
@@ -318,7 +312,8 @@ if best_file and current_file:
         c = changed_df['label_text'].value_counts().reindex(labels, fill_value=0)
 
         # 막대의 위치와 너비 설정
-        x = np.arange(len(labels))
+        x = pd.Series(changed_df['label_text'].dropna().unique()).sort_values().tolist()
+
         width = 0.25  # 막대 너비
 
         # 그룹화된 막대그래프를 그리기 위한 위치 설정
