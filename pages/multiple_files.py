@@ -326,11 +326,11 @@ if best_file and current_file:
         st.write(f"Filtered data for label: {selected_label}")
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.maekdown("**Filted data : **")
+            st.markdown("**Filted data : **")
             st.dataframe(filtered_df[['ID', 'target_best', 'target_current', 'label']])
         with col2:
-            st.maekdown("**Filted best data : ** best가 틀린 데이터")
+            st.markdown("**Filted best data : ** best가 틀린 데이터")
             st.dataframe(filtered_best_df[['ID', 'target_best', 'target_current', 'label']])
         with col3:
-            st.maekdown("**Filted current data : ** current가 틀린 데이터")
+            st.markdown("**Filted current data : ** current가 틀린 데이터")
             st.dataframe(filtered_current_df[['ID', 'target_best', 'target_current', 'label']])
