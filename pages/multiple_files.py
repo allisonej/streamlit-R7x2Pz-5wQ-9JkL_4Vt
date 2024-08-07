@@ -9,7 +9,7 @@ import numpy as np
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
-meta_url = "https://drive.google.com/file/d/1CaVSel3_Rs65EwTi6pV9Al-RNQw0hRUN/view?usp=sharing"
+meta_url = "https://docs.google.com/uc?export=download&id=1y-2ZLNxR7FzwqmCY5powZZkyYva7qOM2-Y1HnP2m248"
 
 @st.cache_data
 def map_target_to_text(target_value, meta_key):
