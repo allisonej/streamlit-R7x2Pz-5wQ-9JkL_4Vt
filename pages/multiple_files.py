@@ -337,7 +337,7 @@ if best_file and current_file:
 
     with tabs[3]:
         st.header("레이블 필터링")
-        unique_labels = changed_df['label'].dropna().unique()
+        unique_labels = sorted(changed_df['label'].dropna().unique())
         selected_label = st.selectbox('Select Actual Label for Filtering', options=unique_labels)
         filtered_df = changed_df[changed_df['label'] == selected_label]
         filtered_best_df = filtered_df[filtered_df['label'] != filtered_df['target_best']]
