@@ -9,8 +9,15 @@ import numpy as np
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
+meta_url = "https://drive.google.com/file/d/1CaVSel3_Rs65EwTi6pV9Al-RNQw0hRUN/view?usp=sharing"
 
 @st.cache_data
+def map_target_to_text(target_value, meta_key):
+    """Map target or label value to its corresponding text in the format 'target_value_translation'."""
+    mapping = meta_key.set_index('target')['translation'].to_dict()
+    translation = mapping.get(target_value, 'Unknown')
+    return f"{target_value}_{translation}"
+
 
 def calculate_statistics(changed_df, answer_df, current_df):
     """Calculate and return statistics for the changed dataframe."""
@@ -184,8 +191,8 @@ def display_results(changed_df, answer_df, current_df):
         # 2. 틀린 예측값 빈도수
         st.write("2. 틀린 예측값 빈도수:")
         col1, col2, col3 = st.columns(3)
-        target_counts_best = changed_df['target_best'].value_counts().sort_values(ascending=False)
-        target_counts_current = changed_df['target_current'].value_counts().sort_values(ascending=False)
+        target_counts_best = changed_df['target_best_text'].value_counts().sort_values(ascending=False)
+        target_counts_current = changed_df['target_current_text'].value_counts().sort_values(ascending=False)
         with col1:
             st.write("Best File에서의 빈도수:")
             st.write(target_counts_best)
@@ -204,24 +211,24 @@ def display_results(changed_df, answer_df, current_df):
         col1, col2, col3 = st.columns(3)
         with col1:
             # target_best에서 label과 다른 값들의 수
-            wrong_label_best = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
+            wrong_label_best = changed_df[changed_df['target_best'] != changed_df['label']]['label_text'].value_counts().sort_values(ascending=False)
             st.write("Best File에서의 빈도수:")
             st.write(wrong_label_best)
         with col2:
             # target_current에서 label과 다른 값들의 수
-            wrong_label_current = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().sort_values(ascending=False)
+            wrong_label_current = changed_df[changed_df['target_current'] != changed_df['label']]['label_text'].value_counts().sort_values(ascending=False)
             st.write("Current File에서의 빈도수:")
             st.write(wrong_label_current)
         with col3:
             # 전체적으로 틀린 label 수
-            all_wrong_labels = changed_df['label'].value_counts().sort_values(ascending=False)
+            all_wrong_labels = changed_df['label_text'].value_counts().sort_values(ascending=False)
             st.write("전체적으로 틀린 label 수:")
             st.write(all_wrong_labels)
 
         # 4. target_best, target_current, label 조합의 빈도수
         st.write("4. target_best, target_current, label 조합의 빈도수:")
-        pair_counts = changed_df.groupby(['target_best', 'target_current', 'label']).size().reset_index(name='Count')
-        st.dataframe(pair_counts.sort_values(by='Count', ascending=False))
+        pair_counts = changed_df.groupby(['target_best_text', 'target_current_text', 'label_text']).size().reset_index(name='count')
+        st.dataframe(pair_counts.sort_values(by='count', ascending=False))
     else:
         st.write("변경된 target 값이 없습니다.")
     
@@ -235,9 +242,22 @@ st.title("CSV File Grader and Analyzer")
 
 st.write("업로드할 CSV 파일들을 선택하세요.")
 
-# get answer
-response = requests.get(sheet_url)
-answer_key = pd.read_csv(StringIO(response.text))
+@st.cache_data
+def load_answer_key(url):
+    # 구글 시트에서 정답 데이터를 CSV로 읽어오기
+    response = requests.get(url)
+    answer_key = pd.read_csv(StringIO(response.text))
+    return answer_key
+
+@st.cache_data
+def load_meta_key(url):
+    # 구글 시트에서 메타 데이터를 CSV로 읽어오기
+    response = requests.get(url)
+    meta_key = pd.read_csv(StringIO(response.text))
+    return meta_key
+
+answer_key = load_answer_key(sheet_url)
+meta_key = load_meta_key(meta_url)
 
 # 파일 업로드
 col1, col2 = st.columns(2)
@@ -269,6 +289,11 @@ if best_file and current_file:
     merged_df['target_mismatch'] = pd.concat(mismatch_conditions, axis=1).any(axis=1)
     changed_df = merged_df[merged_df['target_mismatch']]
 
+    # meta_key를 적용하여 변환
+    for column in target_columns+['label']:
+        merged_df[f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+        changed_df[f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+
     # 탭 생성
     tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링"])
 
@@ -288,9 +313,9 @@ if best_file and current_file:
         labels = list(range(17))  # 0부터 16까지의 항목
 
         # 데이터 준비
-        a = changed_df['target_best'].value_counts().reindex(labels, fill_value=0)
-        b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
-        c = changed_df['label'].value_counts().reindex(labels, fill_value=0)
+        a = changed_df['target_best_text'].value_counts().reindex(labels, fill_value=0)
+        b = changed_df['target_current_text'].value_counts().reindex(labels, fill_value=0)
+        c = changed_df['label_text'].value_counts().reindex(labels, fill_value=0)
 
         # 막대의 위치와 너비 설정
         x = np.arange(len(labels))
@@ -298,9 +323,9 @@ if best_file and current_file:
 
         # 그룹화된 막대그래프를 그리기 위한 위치 설정
         fig, ax = plt.subplots(figsize=(14, 7))
-        rects1 = ax.bar(x - width, a, width, label='target_best', color='red')
-        rects2 = ax.bar(x, b, width, label='target_current', color='blue')
-        rects3 = ax.bar(x + width, c, width, label='label', color='purple')
+        rects1 = ax.bar(x - width, a, width, label='target_best_text', color='red')
+        rects2 = ax.bar(x, b, width, label='target_current_text', color='blue')
+        rects3 = ax.bar(x + width, c, width, label='label_text', color='purple')
 
         # 레이블, 제목 및 범례 설정
         ax.set_xlabel('Value')
@@ -318,9 +343,9 @@ if best_file and current_file:
 
     with tabs[3]:
         st.header("레이블 필터링")
-        unique_labels = changed_df['label'].dropna().unique()
+        unique_labels = changed_df['label_text'].dropna().unique()
         selected_label = st.selectbox('Select Actual Label for Filtering', options=unique_labels)
-        filtered_df = changed_df[changed_df['label'] == selected_label]
+        filtered_df = changed_df[changed_df['label_text'] == selected_label]
         filtered_best_df = filtered_df[filtered_df['label'] != filtered_df['target_best']]
         filtered_current_df = filtered_df[filtered_df['label'] != filtered_df['target_current']]
         st.write(f"Filtered data for label: {selected_label}")
