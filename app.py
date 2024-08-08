@@ -12,7 +12,7 @@ meta_url = "https://docs.google.com/spreadsheets/d/1y-2ZLNxR7FzwqmCY5powZZkyYva7
 def load_key(url):
     # 구글 시트에서 정답 데이터를 CSV로 읽어오기
     response = requests.get(url)
-    key = pd.read_excel(StringIO(response.text), engine='openpyxl')
+    key = pd.read_csv(StringIO(response.text))
     return key
 
 def map_target_to_text(target_value, meta_key):
