@@ -39,8 +39,8 @@ def process_files(uploaded_file, answer_key, meta_key):
 
     # meta 적용 for viewer
     for column in ['target', 'label']:
-        merged_df.loc[:, f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
-        changed_df.loc[:, f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+        merged_df.loc[:, column] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+        changed_df.loc[:, column] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
 
     # 분석 결과 출력
     if not changed_df.empty:
