@@ -6,7 +6,7 @@ from sklearn.metrics import f1_score
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
-meta_url = "https://docs.google.com/spreadsheets/d/1y-2ZLNxR7FzwqmCY5powZZkyYva7qOM2-Y1HnP2m248/export?format=csv"
+# meta_url = "https://docs.google.com/spreadsheets/d/1y-2ZLNxR7FzwqmCY5powZZkyYva7qOM2-Y1HnP2m248/export?format=csv"/
 
 @st.cache_data
 def load_key(url):
@@ -15,11 +15,11 @@ def load_key(url):
     key = pd.read_csv(StringIO(response.text))
     return key
 
-def map_target_to_text(target_value, meta_key):
-    """Map target or label value to its corresponding text in the format 'target_value_translation'."""
-    mapping = meta_key.set_index('target')['translation'].to_dict()
-    translation = mapping.get(target_value, 'Unknown')
-    return f"{target_value}_{translation}"
+# def map_target_to_text(target_value, meta_key):
+#     """Map target or label value to its corresponding text in the format 'target_value_translation'."""
+#     mapping = meta_key.set_index('target')['translation'].to_dict()
+#     translation = mapping.get(target_value, 'Unknown')
+#     return f"{target_value}_{translation}"
 
 def process_files(uploaded_file, answer_key, meta_key):
     # 업로드된 CSV 파일 읽기
@@ -39,13 +39,13 @@ def process_files(uploaded_file, answer_key, meta_key):
 
     st.write(map_target_to_text(16, meta_key))
 
-    # meta 적용 for viewer
-    merged_df = merged_df.copy()  # 데이터프레임의 복사본을 생성합니다.
-    changed_df = changed_df.copy()  # 데이터프레임의 복사본을 생성합니다.
+    # # meta 적용 for viewer
+    # merged_df = merged_df.copy()  # 데이터프레임의 복사본을 생성합니다.
+    # changed_df = changed_df.copy()  # 데이터프레임의 복사본을 생성합니다.
     
-    for column in ['target', 'label']:
-        merged_df[f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
-        changed_df[f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+    # for column in ['target', 'label']:
+    #     merged_df[f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+    #     changed_df[f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
 
     # 분석 결과 출력
     if not changed_df.empty:
