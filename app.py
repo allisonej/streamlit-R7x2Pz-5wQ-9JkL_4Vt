@@ -37,6 +37,8 @@ def process_files(uploaded_file, answer_key, meta_key):
     macro_f1 = f1_score(merged_df['label'], merged_df['target'], average='macro')
     st.markdown(f"Macro F1 Score: **:blue[{macro_f1:.4f}]**")
 
+    st.write(map_target_to_text(16, meta_key))
+
     # meta 적용 for viewer
     merged_df = merged_df.copy()  # 데이터프레임의 복사본을 생성합니다.
     changed_df = changed_df.copy()  # 데이터프레임의 복사본을 생성합니다.
