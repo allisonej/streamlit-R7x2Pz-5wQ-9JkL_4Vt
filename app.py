@@ -9,18 +9,11 @@ sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDb
 meta_url = "https://docs.google.com/spreadsheets/d/1y-2ZLNxR7FzwqmCY5powZZkyYva7qOM2-Y1HnP2m248/export?format=csv"
 
 @st.cache_data
-def load_answer_key(url):
+def load_key(url):
     # 구글 시트에서 정답 데이터를 CSV로 읽어오기
     response = requests.get(url)
-    answer_key = pd.read_csv(StringIO(response.text))
-    return answer_key
-
-@st.cache_data
-def load_meta_key(url):
-    # 구글 시트에서 메타 데이터를 CSV로 읽어오기
-    response = requests.get(url)
-    meta_key = pd.read_csv(StringIO(response.text))
-    return meta_key
+    key = pd.read_csv(StringIO(response.text))
+    return key
 
 def map_target_to_text(target_value, meta_key):
     """Map target or label value to its corresponding text in the format 'target_value_translation'."""
@@ -45,10 +38,9 @@ def process_files(uploaded_file, answer_key, meta_key):
     st.markdown(f"Macro F1 Score: **:blue[{macro_f1:.4f}]**")
 
     # meta 적용 for viewer
-    merged_df['target'] = merged_df['target'].apply(lambda x: map_target_to_text(x, meta_key))
-    merged_df['label'] = merged_df['label'].apply(lambda x: map_target_to_text(x, meta_key))
-    changed_df['target'] = changed_df['target'].apply(lambda x: map_target_to_text(x, meta_key))
-    changed_df['label'] = changed_df['label'].apply(lambda x: map_target_to_text(x, meta_key))
+    for column in ['target', 'label']:
+        merged_df.loc[:, f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+        changed_df.loc[:, f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
 
     # 분석 결과 출력
     if not changed_df.empty:
@@ -117,6 +109,6 @@ st.write("업로드할 CSV 파일을 선택하세요.")
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
-    answer_key = load_answer_key(sheet_url)
-    meta_key = load_meta_key(meta_url)
+    answer_key = load_key(sheet_url)
+    meta_key = load_key(meta_url)
     process_files(uploaded_file, answer_key, meta_key)
