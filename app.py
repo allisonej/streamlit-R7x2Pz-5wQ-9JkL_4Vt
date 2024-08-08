@@ -64,7 +64,7 @@ def process_files(uploaded_file, answer_key):
         
         with col2:
             st.write("[예측값, 정답] 조합의 빈도수:")
-            pair_counts = changed_df.groupby(['target_text', 'label_text']).size().reset_index(name='count')
+            pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='count')
             pair_counts_sorted = pair_counts.sort_values(by='count', ascending=False)
             st.write(pair_counts_sorted)
             # 결과를 CSV로 저장
@@ -78,8 +78,8 @@ def process_files(uploaded_file, answer_key):
         col1, col2 = st.columns(2)
         with col1:
             st.write("틀린 예측값 빈도, 틀린 비율: target으로 잘못 예측한 수 / target으로 예측한 전체 수")
-            wrong_counts = changed_df['target_text'].value_counts() # 예측값 틀린 것 셈
-            total_counts = merged_df['target_text'].value_counts() # 예측값 전체 셈
+            wrong_counts = changed_df['target'].value_counts() # 예측값 틀린 것 셈
+            total_counts = merged_df['target'].value_counts() # 예측값 전체 셈
             counts_combined = pd.concat([wrong_counts, total_counts], axis=1, sort=False).fillna(0)
             counts_combined.columns = ['wrong_count', 'total_count']
             counts_combined['rate'] = counts_combined['wrong_count'] / counts_combined['total_count']
@@ -88,8 +88,8 @@ def process_files(uploaded_file, answer_key):
         
         with col2:
             st.write("못 맞춘 정답 빈도, 틀린 비율: 잘못 예측한 실제값 수 / 전체 실제값 수")
-            wrong_counts = changed_df['label_text'].value_counts() # 실제값 틀린 것 셈
-            total_counts = merged_df['label_text'].value_counts() # 실제값 전체 셈
+            wrong_counts = changed_df['label'].value_counts() # 실제값 틀린 것 셈
+            total_counts = merged_df['label'].value_counts() # 실제값 전체 셈
             counts_combined = pd.concat([wrong_counts, total_counts], axis=1, sort=False).fillna(0)
             counts_combined.columns = ['wrong_count', 'total_count']
             counts_combined['rate'] = counts_combined['wrong_count'] / counts_combined['total_count']
