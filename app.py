@@ -21,7 +21,7 @@ def load_key(url):
 #     translation = mapping.get(target_value, 'Unknown')
 #     return f"{target_value}_{translation}"
 
-def process_files(uploaded_file, answer_key, meta_key):
+def process_files(uploaded_file, answer_key):
     # 업로드된 CSV 파일 읽기
     user_df = pd.read_csv(uploaded_file)
 
@@ -113,5 +113,5 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     answer_key = load_key(sheet_url)
-    meta_key = load_key(meta_url)
-    process_files(uploaded_file, answer_key, meta_key)
+    # meta_key = load_key(meta_url)
+    process_files(uploaded_file, answer_key)
