@@ -38,9 +38,12 @@ def process_files(uploaded_file, answer_key, meta_key):
     st.markdown(f"Macro F1 Score: **:blue[{macro_f1:.4f}]**")
 
     # meta 적용 for viewer
+    merged_df = merged_df.copy()  # 데이터프레임의 복사본을 생성합니다.
+    changed_df = changed_df.copy()  # 데이터프레임의 복사본을 생성합니다.
+    
     for column in ['target', 'label']:
-        merged_df.loc[:, f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
-        changed_df.loc[:, f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+        merged_df[f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
+        changed_df[f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
 
     # 분석 결과 출력
     if not changed_df.empty:
