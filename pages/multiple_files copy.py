@@ -303,6 +303,18 @@ if best_file and current_file:
         st.header("그래프")
         plt.figure(figsize=(14, 7))
 
+        st.markdown(
+            """
+            **그래프 설명:**
+
+            - **target_best**: best file에서 틀린 항목들의 *'target'*별 수를 나타내는 red:[빨간색] 막대입니다.
+            - **target_current**: current file에서 틀린 항목들의 *'target'*별 수를 나타내는 blue:[파란색] 막대입니다.
+            - **best_label**: best file에서 틀린 항목들의 *'label'* 분포를 나타내는 violet:[연보라색] 막대입니다.
+            - **current_label**: current file에서 틀린 항목들의 *'label'* 분포를 나타내는 dodgerblue:[다홍색] 막대입니다.
+            - **label**: 'label' 값의 전체 분포(두 파일의 합집합)를 나타내는 purple:[보라색] 막대입니다.
+            """
+        )
+
         # 예시 데이터 생성
         labels = list(range(17))  # 0부터 16까지의 항목
 
