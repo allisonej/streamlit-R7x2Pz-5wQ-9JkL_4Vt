@@ -311,6 +311,7 @@ if best_file and current_file:
         b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
         c = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().reindex(labels, fill_value=0)
         d = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().reindex(labels, fill_value=0)
+        e = changed_df['label'].value_counts().reindex(labels, fill_value=0)
 
         # 막대의 위치와 너비 설정
         x = np.arange(len(labels))
@@ -322,6 +323,7 @@ if best_file and current_file:
         rects2 = ax.bar(x, b, width, label='target_current', color='blue')
         rects3 = ax.bar(x + width, c, width, label='best_label', color='violet')
         rects4 = ax.bar(x + width*2, d, width, label='current_label', color='dodgerblue')
+        rects5 = ax.bar(x + width*3, e, width, label='label', color='purple')
 
         # 레이블, 제목 및 범례 설정
         ax.set_xlabel('Value')
