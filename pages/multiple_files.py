@@ -289,7 +289,7 @@ if best_file and current_file:
 
 
     # 탭 생성
-    tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링"])
+    tabs = st.tabs(["평가지표", "통계표", "데이터 시각화", "데이터 필터링", 'IDs'])
 
     with tabs[0]:
         st.header("평가지표")
@@ -309,17 +309,21 @@ if best_file and current_file:
         # 데이터 준비
         a = changed_df['target_best'].value_counts().reindex(labels, fill_value=0)
         b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
-        c = changed_df['label'].value_counts().reindex(labels, fill_value=0)
+        c = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().reindex(labels, fill_value=0)
+        d = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().reindex(labels, fill_value=0)
+        e = changed_df['label'].value_counts().reindex(labels, fill_value=0)
 
         # 막대의 위치와 너비 설정
         x = np.arange(len(labels))
-        width = 0.25  # 막대 너비
+        width = 0.15  # 막대 너비
 
         # 그룹화된 막대그래프를 그리기 위한 위치 설정
         fig, ax = plt.subplots(figsize=(14, 7))
         rects1 = ax.bar(x - width, a, width, label='target_best', color='red')
         rects2 = ax.bar(x, b, width, label='target_current', color='blue')
-        rects3 = ax.bar(x + width, c, width, label='label', color='purple')
+        rects3 = ax.bar(x + width, c, width, label='best_label', color='violet')
+        rects4 = ax.bar(x + width*2, d, width, label='current_label', color='dodgerblue')
+        rects5 = ax.bar(x + width*3, e, width, label='label', color='purple')
 
         # 레이블, 제목 및 범례 설정
         ax.set_xlabel('Value')
@@ -330,7 +334,7 @@ if best_file and current_file:
         ax.legend(title='Category')
 
         # 막대그래프가 잘 보이도록 Y축 범위를 설정
-        ax.set_ylim(0, max(max(a), max(b), max(c)) + 1)
+        ax.set_ylim(0, max(max(a), max(b), max(c), max(d)) + 1)
 
         # 그래프 표시
         st.pyplot(fig)
@@ -353,3 +357,37 @@ if best_file and current_file:
         with col3:
             st.markdown("**Filted current data : ** current가 틀린 데이터")
             st.dataframe(filtered_current_df[['ID', 'target_best', 'target_current', 'label']])
+
+    with tabs[4]:
+        st.header("IDs")
+
+        # Table A: 'target_best' != 'label' and 'target_current' != 'label'
+        table_a = changed_df[(changed_df['target_best'] != changed_df['label']) & 
+                            (changed_df['target_current'] != changed_df['label'])]
+        table_a_ids = table_a['ID'].tolist()
+        st.markdown("""
+        **테이블 A IDs (target_best와 target_current가 모두 label과 다른 데이터):**
+        """)
+        st.write(table_a)
+        st.download_button(label="테이블 A IDs 복사", data="\n".join(map(str, table_a_ids)), file_name="table_a_ids.txt", mime="text/plain")
+
+        # Table B: 'target_best' == 'label' or 'target_current' == 'label'
+        table_b = changed_df[(changed_df['target_best'] == changed_df['label']) | 
+                            (changed_df['target_current'] == changed_df['label'])]
+        table_b_ids = table_b['ID'].tolist()
+        st.markdown("""
+        **테이블 B IDs (target_best 또는 target_current가 label과 같은 데이터):**
+        """)
+        st.write(table_b)
+        st.download_button(label="테이블 B IDs 복사", data="\n".join(map(str, table_b_ids)), file_name="table_b_ids.txt", mime="text/plain")
+
+        # Table C: 'target_best' == 'target_current'
+        table_c = changed_df[changed_df['target_best'] == changed_df['target_current']]
+        table_c_ids = table_c['ID'].tolist()
+        st.markdown("""
+        **테이블 C IDs (target_best와 target_current가 같은 데이터):**
+        """)
+        st.write(table_c)
+        st.download_button(label="테이블 C IDs 복사", data="\n".join(map(str, table_c_ids)), file_name="table_c_ids.txt", mime="text/plain")
+        
+        
