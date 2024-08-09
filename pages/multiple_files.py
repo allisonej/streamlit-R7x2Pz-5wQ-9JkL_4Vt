@@ -305,11 +305,11 @@ if best_file and current_file:
             """
             ##### **그래프 설명:**
 
-            - **target_best**: best file에서 틀린 항목들의 *'target'*별 수를 나타내는 red:[빨간색] 막대입니다.
-            - **target_current**: current file에서 틀린 항목들의 *'target'*별 수를 나타내는 blue:[파란색] 막대입니다.
-            - **best_label**: best file에서 틀린 항목들의 *'label'* 분포를 나타내는 violet:[연보라색] 막대입니다.
-            - **current_label**: current file에서 틀린 항목들의 *'label'* 분포를 나타내는 dodgerblue:[다홍색] 막대입니다.
-            - **label**: 'label' 값의 전체 분포(두 파일의 합집합)를 나타내는 purple:[보라색] 막대입니다.
+            - **target_best**: best file에서 틀린 항목들의 *'target'*별 수를 나타내는 빨간색 막대입니다.
+            - **target_current**: current file에서 틀린 항목들의 *'target'*별 수를 나타내는 파란색 막대입니다.
+            - **best_label**: best file에서 틀린 항목들의 *'label'* 분포를 나타내는 연보라색 막대입니다.
+            - **current_label**: current file에서 틀린 항목들의 *'label'* 분포를 나타내는 하늘색 막대입니다.
+            - **label**: 'label' 값의 전체 분포(두 파일의 합집합)를 나타내는 보라색 막대입니다.
             """
         )
         plt.figure(figsize=(14, 7))
