@@ -313,7 +313,7 @@ if best_file and current_file:
             - **current_label**: current file에서 틀린 항목들의 *'label'* 분포를 나타내는 <span style='color:dodgerblue'>다홍색</span> 막대입니다.
             - **label**: 'label' 값의 전체 분포(두 파일의 합집합)를 나타내는 <span style='color:purple'>보라색</span> 막대입니다.
             """
-        )
+        , unsafe_allo_html=True)
 
         # 예시 데이터 생성
         labels = list(range(17))  # 0부터 16까지의 항목
