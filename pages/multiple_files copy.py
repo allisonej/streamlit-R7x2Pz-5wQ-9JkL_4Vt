@@ -314,14 +314,14 @@ if best_file and current_file:
 
         # 막대의 위치와 너비 설정
         x = np.arange(len(labels))
-        width = 0.25  # 막대 너비
+        width = 0.20  # 막대 너비
 
         # 그룹화된 막대그래프를 그리기 위한 위치 설정
         fig, ax = plt.subplots(figsize=(14, 7))
         rects1 = ax.bar(x - width, a, width, label='target_best', color='red')
         rects2 = ax.bar(x, b, width, label='target_current', color='blue')
-        rects3 = ax.bar(x + width, c, width, label='best_label', color='pink')
-        rects4 = ax.bar(x + width*2, d, width, label='current_label', color='purple')
+        rects3 = ax.bar(x + width, c, width, label='best_label', color='violet')
+        rects4 = ax.bar(x + width*2, d, width, label='current_label', color='dodgerblue')
 
         # 레이블, 제목 및 범례 설정
         ax.set_xlabel('Value')
