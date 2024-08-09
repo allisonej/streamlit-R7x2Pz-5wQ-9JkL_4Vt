@@ -309,7 +309,8 @@ if best_file and current_file:
         # 데이터 준비
         a = changed_df['target_best'].value_counts().reindex(labels, fill_value=0)
         b = changed_df['target_current'].value_counts().reindex(labels, fill_value=0)
-        c = changed_df['label'].value_counts().reindex(labels, fill_value=0)
+        c = changed_df[changed_df['target_best'] != changed_df['label']]['label'].value_counts().reindex(labels, fill_value=0)
+        d = changed_df[changed_df['target_current'] != changed_df['label']]['label'].value_counts().reindex(labels, fill_value=0)
 
         # 막대의 위치와 너비 설정
         x = np.arange(len(labels))
@@ -319,7 +320,8 @@ if best_file and current_file:
         fig, ax = plt.subplots(figsize=(14, 7))
         rects1 = ax.bar(x - width, a, width, label='target_best', color='red')
         rects2 = ax.bar(x, b, width, label='target_current', color='blue')
-        rects3 = ax.bar(x + width, c, width, label='label', color='purple')
+        rects3 = ax.bar(x + width, c, width, label='best_label', color='pink')
+        rects4 = ax.bar(x + width*2, d, width, label='current_label', color='purple')
 
         # 레이블, 제목 및 범례 설정
         ax.set_xlabel('Value')
@@ -330,7 +332,7 @@ if best_file and current_file:
         ax.legend(title='Category')
 
         # 막대그래프가 잘 보이도록 Y축 범위를 설정
-        ax.set_ylim(0, max(max(a), max(b), max(c)) + 1)
+        ax.set_ylim(0, max(max(a), max(b), max(c), max(d)) + 1)
 
         # 그래프 표시
         st.pyplot(fig)
