@@ -315,7 +315,7 @@ if best_file and current_file:
 
         # 막대의 위치와 너비 설정
         x = np.arange(len(labels))
-        width = 0.20  # 막대 너비
+        width = 0.15  # 막대 너비
 
         # 그룹화된 막대그래프를 그리기 위한 위치 설정
         fig, ax = plt.subplots(figsize=(14, 7))
