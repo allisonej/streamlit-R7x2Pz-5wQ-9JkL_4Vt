@@ -305,7 +305,7 @@ if best_file and current_file:
 
         st.markdown(
             """
-            **그래프 설명:**
+            ##### **그래프 설명:**
 
             - **target_best**: best file에서 틀린 항목들의 *'target'*별 수를 나타내는 red:[빨간색] 막대입니다.
             - **target_current**: current file에서 틀린 항목들의 *'target'*별 수를 나타내는 blue:[파란색] 막대입니다.
