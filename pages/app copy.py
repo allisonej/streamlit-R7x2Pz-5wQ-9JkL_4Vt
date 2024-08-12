@@ -102,7 +102,7 @@ def process_files(uploaded_file, answer_key):
 
                 # 디버깅 정보 출력
                 st.write("Confusion Matrix shape:", cm.shape)
-                st.write("Unique labels:", unique_labels)
+                st.write("Unique labels:", unique_labels.reshape(1, -1))
 
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='PuBu', ax=ax)
@@ -122,7 +122,7 @@ def process_files(uploaded_file, answer_key):
 
                 # 디버깅 정보 출력
                 st.write("Confusion Matrix shape:", cm.shape)
-                st.write("Unique labels:", unique_labels)
+                st.write("Unique labels:", unique_labels.reshape(1, -1))
 
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)
@@ -138,12 +138,14 @@ def process_files(uploaded_file, answer_key):
             st.subheader("Label별 평가 지표")
             report = classification_report(merged_df['label'], merged_df['target'], output_dict=True)
             report_df = pd.DataFrame(report).transpose()
+            report_df = report_df.round(4) 
             st.dataframe(report_df)
 
         else:
             st.write("변경된 target 값이 없습니다.")
     except Exception as e:
         st.error(f"오류가 발생했습니다: {e}")
+        st.write(traceback.format_exc()) 
 
 # 사이드바에 메시지 추가
 st.sidebar.write("우측 메뉴에서 wide mode를 적용해주세요.")
