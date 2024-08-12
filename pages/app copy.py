@@ -102,7 +102,7 @@ def process_files(uploaded_file, answer_key):
 
                 # 디버깅 정보 출력
                 st.write("Confusion Matrix shape:", cm.shape)
-                st.write("Unique labels:", unique_labels.reshape(1, -1))
+                st.write("Unique labels:", unique_labels.tolist())
 
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='PuBu', ax=ax)
@@ -122,7 +122,7 @@ def process_files(uploaded_file, answer_key):
 
                 # 디버깅 정보 출력
                 st.write("Confusion Matrix shape:", cm.shape)
-                st.write("Unique labels:", unique_labels.reshape(1, -1))
+                st.write("Unique labels:", unique_labels.tolist())
 
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)
