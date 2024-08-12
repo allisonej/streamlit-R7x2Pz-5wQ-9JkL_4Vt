@@ -50,11 +50,7 @@ def process_files(uploaded_file, answer_key, meta_key):
 
             with col1:
                 st.write("ID, 예측값, 정답:")
-                # meta 정보를 활용하여 예측값, 정답 표시
-                changed_df_display = changed_df.reset_index()[['ID', 'target', 'label']].copy()
-                changed_df_display['target'] = changed_df_display['target'].astype(str) + '_' + changed_df_display['target'].astype(str).map(meta_dict)
-                changed_df_display['label'] = changed_df_display['label'].astype(str) + '_' + changed_df_display['label'].astype(str).map(meta_dict)
-                st.dataframe(changed_df_display) 
+                st.dataframe(changed_df[['ID', 'target', 'label']])
 
                 # 결과를 CSV로 저장
                 csv_data = changed_df.reset_index().to_csv(index=False) 
@@ -68,12 +64,7 @@ def process_files(uploaded_file, answer_key, meta_key):
                 st.write("[예측값, 정답] 조합의 빈도수:")
                 pair_counts = changed_df.groupby(['target', 'label']).size().reset_index(name='count')
                 pair_counts_sorted = pair_counts.sort_values(by='count', ascending=False)
-                # meta 정보를 활용하여 예측값, 정답 표시
-                pair_counts_display = pair_counts_sorted.copy()
-                pair_counts_display['target'] = pair_counts_display['target'].astype(str) + '_' + pair_counts_display['target'].astype(str).map(meta_dict)
-                pair_counts_display['label'] = pair_counts_display['label'].astype(str) + '_' + pair_counts_display['label'].astype(str).map(meta_dict)
-                st.write(pair_counts_display)
-
+                st.write(pair_counts_sorted)
                 # 결과를 CSV로 저장
                 csv_data = pair_counts_sorted.to_csv(index=False)
                 st.download_button(
