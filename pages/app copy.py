@@ -51,7 +51,7 @@ def process_files(uploaded_file, answer_key, meta_key):
 
             with col1:
                 st.write("ID, 예측값, 정답:")
-                st.dataframe(changed_df[['ID', 'target', 'label']])
+                st.dataframe(changed_df)
 
                 # 결과를 CSV로 저장
                 csv_data = changed_df.reset_index().to_csv(index=False) 
