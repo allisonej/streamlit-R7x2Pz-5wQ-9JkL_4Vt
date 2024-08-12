@@ -113,7 +113,7 @@ def process_files(uploaded_file, answer_key, meta_key):
                 unique_labels = np.sort(unique_labels.astype(int))
 
                 fig, ax = plt.subplots()
-                sns.heatmap(cm, annot=True, fmt='d', cmap='Blue', ax=ax)
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
                 ax.set_xlabel('Predicted')
                 ax.set_ylabel('True')
                 # 레이블 설정 (meta 정보를 활용하여 표시, unique_labels_wrong 순서 유지)
