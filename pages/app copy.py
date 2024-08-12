@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 from io import StringIO
-from sklearn.metrics import f1_score, confusion_matrix
+from sklearn.metrics import f1_score, confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -88,18 +88,36 @@ def process_files(uploaded_file, answer_key):
                 counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
                 st.write(counts_combined[['wrong_count', 'rate_view', 'rate']])
 
-            # 추가: 혼동 행렬(Confusion Matrix) 시각화 개선
             st.markdown("---")
-            st.subheader("Confusion Matrix")
-            cm = confusion_matrix(merged_df['label'], merged_df['target'])
-            fig, ax = plt.subplots()
-            sns.heatmap(cm, annot=True, fmt='d', cmap='PuBu', ax=ax)  # 컬러맵 변경
-            ax.set_xlabel('Predicted')
-            ax.set_ylabel('True')
-            # 레이블 설정
-            ax.set_xticklabels(merged_df['target'].unique())
-            ax.set_yticklabels(merged_df['label'].unique())
-            st.pyplot(fig)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.subheader("Confusion Matrix")
+                cm = confusion_matrix(merged_df['label'], merged_df['target'])
+                fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt='d', cmap='PuBu', ax=ax)
+                ax.set_xlabel('Predicted')
+                ax.set_ylabel('True')
+                ax.set_xticklabels(merged_df['target'].unique())
+                ax.set_yticklabels(merged_df['label'].unique())
+                st.pyplot(fig)
+            with col2:
+                st.subheader("Wrong - Confusion Matrix")
+                cm = confusion_matrix(changed_df['label'], changed_df['target'])
+                fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)
+                ax.set_xlabel('Predicted')
+                ax.set_ylabel('True')
+                ax.set_xticklabels(changed_df['target'].unique())
+                ax.set_yticklabels(changed_df['label'].unique())
+                st.pyplot(fig)
+
+            # label별 평가 지표 출력
+            st.markdown("---")
+            st.subheader("Label별 평가 지표")
+            report = classification_report(merged_df['label'], merged_df['target'], output_dict=True)
+            report_df = pd.DataFrame(report).transpose()
+            st.dataframe(report_df)
 
         else:
             st.write("변경된 target 값이 없습니다.")
