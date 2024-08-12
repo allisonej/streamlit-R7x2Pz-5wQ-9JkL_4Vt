@@ -85,7 +85,7 @@ def process_files(uploaded_file, answer_key, meta_key):
                 counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
                 # meta 정보를 활용하여 예측값 표시
                 counts_combined_display = counts_combined.copy()
-                counts_combined_display.index = counts_combined_display.index.astype(str) + '_' + counts_combined_display.index.astype(str).map(meta_dict)
+                # counts_combined_display.index = counts_combined_display.index.astype(str) + '_' + counts_combined_display.index.astype(str).map(meta_dict)
                 st.write(counts_combined_display[['wrong_count', 'rate_view', 'rate']])
 
             with col2:
@@ -98,7 +98,7 @@ def process_files(uploaded_file, answer_key, meta_key):
                 counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
                 # meta 정보를 활용하여 정답 표시
                 counts_combined_display = counts_combined.copy()
-                counts_combined_display.index = counts_combined_display.index.astype(str) + '_' + counts_combined_display.index.astype(str).map(meta_dict)
+                # counts_combined_display.index = counts_combined_display.index.astype(str) + '_' + counts_combined_display.index.astype(str).map(meta_dict)
                 st.write(counts_combined_display[['wrong_count', 'rate_view', 'rate']])
 
             st.markdown("---")
@@ -112,16 +112,13 @@ def process_files(uploaded_file, answer_key, meta_key):
                 unique_labels = np.unique(merged_df[['label', 'target']].values)
                 unique_labels = np.sort(unique_labels.astype(int))
 
-                # meta 데이터를 dictionary로 변환하여 매핑
-                unique_label_texts = [str(label) + '_' + meta_dict.get(label, '') for label in unique_labels]
-
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)
                 ax.set_xlabel('Predicted')
                 ax.set_ylabel('True')
                 # 레이블 설정 (meta 정보를 활용하여 표시, unique_labels_wrong 순서 유지)
-                ax.set_xticklabels(unique_label_texts)
-                ax.set_yticklabels(unique_label_texts)
+                ax.set_xticklabels(unique_labels)
+                ax.set_yticklabels(unique_labels)
                 st.pyplot(fig)
 
             # label별 평가 지표 출력
@@ -133,11 +130,11 @@ def process_files(uploaded_file, answer_key, meta_key):
 
             # meta 정보를 활용하여 레이블 표시, unique_labels 순서 유지
             report_df_display = report_df.copy()
-            report_df_display.index = report_df_display.index.astype(str).map(
-                lambda x: x + '_' + meta_dict.get(int(x), '') if x.isdigit() else x
-            )
-            # unique_labels 순서대로 정렬
-            report_df_display = report_df_display.loc[[str(label) + '_' + meta_dict.get(label, '') for label in unique_labels]]
+            # report_df_display.index = report_df_display.index.astype(str).map(
+            #     lambda x: x + '_' + meta_dict.get(int(x), '') if x.isdigit() else x
+            # )
+            # # unique_labels 순서대로 정렬
+            # report_df_display = report_df_display.loc[[str(label) + '_' + meta_dict.get(label, '') for label in unique_labels]]
 
             st.dataframe(report_df_display)
 
