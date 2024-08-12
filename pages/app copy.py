@@ -5,6 +5,7 @@ from io import StringIO
 from sklearn.metrics import f1_score, confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 # Adjust the width of the Streamlit page
 # Streamlit 앱의 레이아웃 설정
@@ -94,22 +95,42 @@ def process_files(uploaded_file, answer_key):
             with col1:
                 st.subheader("Confusion Matrix")
                 cm = confusion_matrix(merged_df['label'], merged_df['target'])
+
+                # 레이블 unique 값 확인 및 중복 제거 후 숫자형으로 변환하여 정렬
+                unique_labels = np.unique(merged_df[['label', 'target']].values)
+                unique_labels = np.sort(unique_labels.astype(int))
+
+                # 디버깅 정보 출력
+                st.write("Confusion Matrix shape:", cm.shape)
+                st.write("Unique labels:", unique_labels)
+
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='PuBu', ax=ax)
                 ax.set_xlabel('Predicted')
                 ax.set_ylabel('True')
-                ax.set_xticklabels(merged_df['target'].unique())
-                ax.set_yticklabels(merged_df['label'].unique())
+                # 레이블 설정 (중복 제거된 unique 값 사용)
+                ax.set_xticklabels(unique_labels)
+                ax.set_yticklabels(unique_labels)
                 st.pyplot(fig)
             with col2:
                 st.subheader("Wrong - Confusion Matrix")
                 cm = confusion_matrix(changed_df['label'], changed_df['target'])
+                
+                # 레이블 unique 값 확인 및 중복 제거 후 숫자형으로 변환하여 정렬
+                unique_labels = np.unique(changed_df[['label', 'target']].values)
+                unique_labels = np.sort(unique_labels.astype(int))
+
+                # 디버깅 정보 출력
+                st.write("Confusion Matrix shape:", cm.shape)
+                st.write("Unique labels:", unique_labels)
+
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)
                 ax.set_xlabel('Predicted')
                 ax.set_ylabel('True')
-                ax.set_xticklabels(changed_df['target'].unique())
-                ax.set_yticklabels(changed_df['label'].unique())
+                # 레이블 설정 (중복 제거된 unique 값 사용)
+                ax.set_xticklabels(unique_labels)
+                ax.set_yticklabels(unique_labels)
                 st.pyplot(fig)
 
             # label별 평가 지표 출력
