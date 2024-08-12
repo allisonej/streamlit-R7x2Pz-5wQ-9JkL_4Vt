@@ -6,6 +6,7 @@ from sklearn.metrics import f1_score, confusion_matrix, classification_report
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import traceback
 
 # Adjust the width of the Streamlit page
 # Streamlit 앱의 레이아웃 설정
