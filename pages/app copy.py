@@ -113,6 +113,22 @@ def process_files(uploaded_file, answer_key, meta_key):
                 unique_labels = np.sort(unique_labels.astype(int))
 
                 fig, ax = plt.subplots()
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blue', ax=ax)
+                ax.set_xlabel('Predicted')
+                ax.set_ylabel('True')
+                # 레이블 설정 (meta 정보를 활용하여 표시, unique_labels_wrong 순서 유지)
+                ax.set_xticklabels(unique_labels)
+                ax.set_yticklabels(unique_labels)
+                st.pyplot(fig)
+            with col2:
+                st.subheader("Wrong - Confusion Matrix")
+                cm = confusion_matrix(changed_df['label'], changed_df['target'])
+
+                # 레이블 unique 값 확인 및 중복 제거 후 숫자형으로 변환하여 정렬
+                unique_labels = np.unique(changed_df[['label', 'target']].values)
+                unique_labels = np.sort(unique_labels.astype(int))
+
+                fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)
                 ax.set_xlabel('Predicted')
                 ax.set_ylabel('True')
