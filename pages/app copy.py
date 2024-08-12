@@ -3,10 +3,17 @@ import pandas as pd
 import requests
 from io import StringIO
 from sklearn.metrics import f1_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Adjust the width of the Streamlit page
+st.set_page_config(
+    page_title="Use Scorer In Streamlit",
+    layout="wide"
+)
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
-# meta_url = "https://docs.google.com/spreadsheets/d/1y-2ZLNxR7FzwqmCY5powZZkyYva7qOM2-Y1HnP2m248/export?format=csv"/
 
 @st.cache_data
 def load_key(url):
@@ -14,12 +21,6 @@ def load_key(url):
     response = requests.get(url)
     key = pd.read_csv(StringIO(response.text))
     return key
-
-# def map_target_to_text(target_value, meta_key):
-#     """Map target or label value to its corresponding text in the format 'target_value_translation'."""
-#     mapping = meta_key.set_index('target')['translation'].to_dict()
-#     translation = mapping.get(target_value, 'Unknown')
-#     return f"{target_value}_{translation}"
 
 def process_files(uploaded_file, answer_key):
     # 업로드된 CSV 파일 읽기
@@ -36,14 +37,6 @@ def process_files(uploaded_file, answer_key):
     # Macro F1 Score 계산
     macro_f1 = f1_score(merged_df['label'], merged_df['target'], average='macro')
     st.markdown(f"Macro F1 Score: **:blue[{macro_f1:.4f}]**")
-
-    # # meta 적용 for viewer
-    # merged_df = merged_df.copy()  # 데이터프레임의 복사본을 생성합니다.
-    # changed_df = changed_df.copy()  # 데이터프레임의 복사본을 생성합니다.
-    
-    # for column in ['target', 'label']:
-    #     merged_df[f'{column}_text'] = merged_df[column].apply(lambda x: map_target_to_text(x, meta_key))
-    #     changed_df[f'{column}_text'] = changed_df[column].apply(lambda x: map_target_to_text(x, meta_key))
 
     # 분석 결과 출력
     if not changed_df.empty:
@@ -96,6 +89,13 @@ def process_files(uploaded_file, answer_key):
             counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
             st.write(counts_combined[['wrong_count', 'rate_view', 'rate']])
 
+        # 추가: target과 label의 상관관계 그래프
+        st.markdown("---")
+        st.subheader("target & label Correlation")
+        fig, ax = plt.subplots()
+        sns.countplot(data=merged_df, x='target', hue='label', ax=ax)
+        st.pyplot(fig)
+
     else:
         st.write("변경된 target 값이 없습니다.")
 
@@ -113,5 +113,4 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     answer_key = load_key(sheet_url)
-    # meta_key = load_key(meta_url)
     process_files(uploaded_file, answer_key)
