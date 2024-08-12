@@ -7,10 +7,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Adjust the width of the Streamlit page
-st.set_page_config(
-    page_title="Use Scorer In Streamlit",
-    layout="wide"
-)
+# Streamlit 앱의 레이아웃 설정
+st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
 
 # Google Sheets URL (공개 CSV 다운로드 링크)
 sheet_url = "https://docs.google.com/spreadsheets/d/1xq_b1XDCdSTHLjaeg4Oy9WWMQDbBLM397BD8AaWmGU0/export?gid=1096947070&format=csv"
@@ -98,9 +96,6 @@ def process_files(uploaded_file, answer_key):
 
     else:
         st.write("변경된 target 값이 없습니다.")
-
-# Streamlit 앱의 레이아웃 설정
-st.set_page_config(page_title="CSV File Grader and Analyzer", layout="wide")
 
 # 사이드바에 메시지 추가
 st.sidebar.write("우측 메뉴에서 wide mode를 적용해주세요.")
