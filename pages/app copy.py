@@ -100,10 +100,6 @@ def process_files(uploaded_file, answer_key):
                 unique_labels = np.unique(merged_df[['label', 'target']].values)
                 unique_labels = np.sort(unique_labels.astype(int))
 
-                # 디버깅 정보 출력
-                st.write("Confusion Matrix shape:", cm.shape)
-                st.write("Unique labels:", unique_labels.tolist())
-
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='PuBu', ax=ax)
                 ax.set_xlabel('Predicted')
@@ -119,10 +115,6 @@ def process_files(uploaded_file, answer_key):
                 # 레이블 unique 값 확인 및 중복 제거 후 숫자형으로 변환하여 정렬
                 unique_labels = np.unique(changed_df[['label', 'target']].values)
                 unique_labels = np.sort(unique_labels.astype(int))
-
-                # 디버깅 정보 출력
-                st.write("Confusion Matrix shape:", cm.shape)
-                st.write("Unique labels:", unique_labels.tolist())
 
                 fig, ax = plt.subplots()
                 sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)
