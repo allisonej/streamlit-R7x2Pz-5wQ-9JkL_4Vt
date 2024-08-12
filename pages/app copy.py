@@ -87,11 +87,14 @@ def process_files(uploaded_file, answer_key):
             counts_combined['rate_view'] = counts_combined.apply(lambda row: f"{int(row['wrong_count'])} / {int(row['total_count'])}", axis=1)
             st.write(counts_combined[['wrong_count', 'rate_view', 'rate']])
 
-        # 추가: target과 label의 상관관계 그래프
+        # 추가: 혼동 행렬(Confusion Matrix) 시각화
         st.markdown("---")
-        st.subheader("target & label Correlation")
+        st.subheader("Confusion Matrix")
+        cm = confusion_matrix(merged_df['label'], merged_df['target'])
         fig, ax = plt.subplots()
-        sns.countplot(data=merged_df, x='target', hue='label', ax=ax)
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
+        ax.set_xlabel('Predicted')
+        ax.set_ylabel('True')
         st.pyplot(fig)
 
     else:
