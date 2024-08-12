@@ -20,7 +20,6 @@ def load_key(url):
     key = pd.read_csv(StringIO(response.text))
     return key
 
-@st.cache_data  # process_files 함수에도 캐싱 적용
 def process_files(uploaded_file, answer_key):
     try:
         # 업로드된 CSV 파일 읽기
@@ -94,7 +93,7 @@ def process_files(uploaded_file, answer_key):
             st.subheader("Confusion Matrix")
             cm = confusion_matrix(merged_df['label'], merged_df['target'])
             fig, ax = plt.subplots()
-            sns.heatmap(cm, annot=True, fmt='d', cmap='Oranges', ax=ax)  # 컬러맵 변경
+            sns.heatmap(cm, annot=True, fmt='d', cmap='PuBu', ax=ax)  # 컬러맵 변경
             ax.set_xlabel('Predicted')
             ax.set_ylabel('True')
             # 레이블 설정
