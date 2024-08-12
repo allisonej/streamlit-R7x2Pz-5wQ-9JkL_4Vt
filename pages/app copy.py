@@ -158,4 +158,4 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 if uploaded_file is not None:
     answer_key = load_key(sheet_url)
     meta_key = load_key(meta_url)
-    process_files(uploaded_file, answer_key)
+    process_files(uploaded_file, answer_key, meta_key)
